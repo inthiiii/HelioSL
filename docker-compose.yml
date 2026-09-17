@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: heliosl-postgres
+
+    environment:
+      POSTGRES_USER: heliosl
+      POSTGRES_PASSWORD: heliosl
+      POSTGRES_DB: heliosl
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - heliosl_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U heliosl -d heliosl"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  heliosl_postgres_data:
