@@ -1,0 +1,45 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+
+# Node
+node_modules/
+.next/
+out/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Database
+*.db
+*.sqlite3
+
+# Vector databases
+vector_store/
+faiss_index/
+
+# User uploads
+uploads/
+
+# Secrets
+*.pem
+*.key
+
+# Temporary
+tmp/
+temp/
