@@ -1,12 +1,36 @@
 from fastapi import APIRouter
 
-from app.api.routes import health
+from app.api.routes import (
+    energy,
+    health,
+    solar,
+    users,
+)
 
 
 api_router = APIRouter()
+
 
 api_router.include_router(
     health.router,
     prefix="/health",
     tags=["Health"],
+)
+
+api_router.include_router(
+    users.router,
+    prefix="/users",
+    tags=["Users"],
+)
+
+api_router.include_router(
+    energy.router,
+    prefix="/energy",
+    tags=["Energy"],
+)
+
+api_router.include_router(
+    solar.router,
+    prefix="/solar",
+    tags=["Solar"],
 )
