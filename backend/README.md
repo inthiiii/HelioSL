@@ -16,3 +16,25 @@ Create environment:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+
+## Core Data Model
+
+HelioSL currently manages:
+
+- Users
+- Energy profiles
+- Monthly electricity consumption
+- Solar systems
+- Monthly solar generation
+
+## Main API Groups
+
+- `/api/v1/users`
+- `/api/v1/energy`
+- `/api/v1/solar`
+- `/api/v1/health`
+
+## Run Development Server
+
+```bash
+python -m uvicorn app.main:app --reload
