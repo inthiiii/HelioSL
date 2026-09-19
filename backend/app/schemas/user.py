@@ -17,6 +17,8 @@ class UserResponse(BaseModel):
     district: str | None
     user_type: str
     created_at: datetime
+    role: str
+    is_active: bool
 
     model_config = ConfigDict(
         from_attributes=True,
