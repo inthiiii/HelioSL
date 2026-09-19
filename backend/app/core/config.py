@@ -31,3 +31,6 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
+access_token_expire_minutes: int = 60
+jwt_algorithm: str = "HS256"
