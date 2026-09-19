@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -62,3 +62,20 @@ class User(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    
+    hashed_password: Mapped[str] = mapped_column(
+    String(255),
+    nullable=False,
+)
+
+role: Mapped[str] = mapped_column(
+    String(50),
+    default="user",
+    nullable=False,
+)
+
+is_active: Mapped[bool] = mapped_column(
+    Boolean,
+    default=True,
+    nullable=False,
+)
