@@ -21,29 +21,6 @@ from app.services.user_service import (
 router = APIRouter()
 
 
-@router.post(
-    "",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def create_new_user(
-    data: UserCreate,
-    db: Session = Depends(get_db),
-):
-    existing = get_user_by_email(
-        db,
-        data.email,
-    )
-
-    if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="Email already registered",
-        )
-
-    return create_user(db, data)
-
-
 @router.get(
     "/{user_id}",
     response_model=UserResponse,
