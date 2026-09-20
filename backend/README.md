@@ -38,3 +38,24 @@ HelioSL currently manages:
 
 ```bash
 python -m uvicorn app.main:app --reload
+
+## Authentication
+
+HelioSL uses JWT-based authentication.
+
+### Register
+
+`POST /api/v1/auth/register`
+
+### Login
+
+`POST /api/v1/auth/login`
+
+### Current User
+
+`GET /api/v1/auth/me`
+
+Protected endpoints require:
+
+```text
+Authorization: Bearer <access_token>
