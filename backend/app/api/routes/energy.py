@@ -6,6 +6,8 @@ from fastapi import (
 )
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from app.models.user import User
+from app.security.dependencies import get_current_user
 
 from app.core.database import get_db
 from app.schemas.energy import (
@@ -27,22 +29,21 @@ router = APIRouter()
 
 
 @router.post(
-    "/users/{user_id}/profile",
+    "/me/profile",
     response_model=EnergyProfileResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def add_energy_profile(
-    user_id: int,
     data: EnergyProfileCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
-    if not get_user(db, user_id):
-        raise HTTPException(
-            status_code=404,
-            detail="User not found",
-        )
-
-    if get_energy_profile(db, user_id):
+    if get_energy_profile(
+        db,
+        current_user.id,
+    ):
         raise HTTPException(
             status_code=409,
             detail="Energy profile already exists",
@@ -50,22 +51,24 @@ def add_energy_profile(
 
     return create_energy_profile(
         db,
-        user_id,
+        current_user.id,
         data,
     )
 
 
 @router.get(
-    "/users/{user_id}/profile",
+    "/me/profile",
     response_model=EnergyProfileResponse,
 )
 def read_energy_profile(
-    user_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
     profile = get_energy_profile(
         db,
-        user_id,
+        current_user.id,
     )
 
     if not profile:
@@ -78,25 +81,21 @@ def read_energy_profile(
 
 
 @router.post(
-    "/users/{user_id}/consumption",
+    "/me/consumption",
     response_model=ConsumptionResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def add_consumption(
-    user_id: int,
     data: ConsumptionCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
-    if not get_user(db, user_id):
-        raise HTTPException(
-            status_code=404,
-            detail="User not found",
-        )
-
     try:
         return create_consumption_record(
             db,
-            user_id,
+            current_user.id,
             data,
         )
 
@@ -111,16 +110,17 @@ def add_consumption(
             ),
         )
 
-
 @router.get(
-    "/users/{user_id}/consumption",
+    "/me/consumption",
     response_model=list[ConsumptionResponse],
 )
 def read_consumption(
-    user_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
     return get_consumption_records(
         db,
-        user_id,
+        current_user.id,
     )

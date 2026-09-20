@@ -22,27 +22,29 @@ from app.services.solar_service import (
 )
 from app.services.user_service import get_user
 
+from app.models.user import User
+from app.security.dependencies import get_current_user
+
 
 router = APIRouter()
 
 
 @router.post(
-    "/users/{user_id}/system",
+    "/me/system",
     response_model=SolarSystemResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def add_solar_system(
-    user_id: int,
     data: SolarSystemCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
-    if not get_user(db, user_id):
-        raise HTTPException(
-            status_code=404,
-            detail="User not found",
-        )
-
-    if get_solar_system(db, user_id):
+    if get_solar_system(
+        db,
+        current_user.id,
+    ):
         raise HTTPException(
             status_code=409,
             detail="Solar system already exists",
@@ -50,22 +52,24 @@ def add_solar_system(
 
     return create_solar_system(
         db,
-        user_id,
+        current_user.id,
         data,
     )
 
 
 @router.get(
-    "/users/{user_id}/system",
+    "/me/system",
     response_model=SolarSystemResponse,
 )
 def read_solar_system(
-    user_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
     system = get_solar_system(
         db,
-        user_id,
+        current_user.id,
     )
 
     if not system:
@@ -78,19 +82,32 @@ def read_solar_system(
 
 
 @router.post(
-    "/systems/{solar_system_id}/generation",
+    "/me/generation",
     response_model=SolarGenerationResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def add_generation(
-    solar_system_id: int,
     data: SolarGenerationCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
+    system = get_solar_system(
+        db,
+        current_user.id,
+    )
+
+    if not system:
+        raise HTTPException(
+            status_code=404,
+            detail="Solar system not found",
+        )
+
     try:
         return create_generation_record(
             db,
-            solar_system_id,
+            system.id,
             data,
         )
 
@@ -107,16 +124,29 @@ def add_generation(
 
 
 @router.get(
-    "/systems/{solar_system_id}/generation",
+    "/me/generation",
     response_model=list[
         SolarGenerationResponse
     ],
 )
 def read_generation(
-    solar_system_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
 ):
+    system = get_solar_system(
+        db,
+        current_user.id,
+    )
+
+    if not system:
+        raise HTTPException(
+            status_code=404,
+            detail="Solar system not found",
+        )
+
     return get_generation_records(
         db,
-        solar_system_id,
+        system.id,
     )
