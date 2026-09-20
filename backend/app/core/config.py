@@ -17,6 +17,9 @@ class Settings(BaseSettings):
 
     secret_key: str
 
+    access_token_expire_minutes: int = 60
+    jwt_algorithm: str = "HS256"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -31,6 +34,3 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
-
-access_token_expire_minutes: int = 60
-jwt_algorithm: str = "HS256"
