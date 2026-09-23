@@ -11,6 +11,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(
         primary_key=True,
+        autoincrement=True,
         index=True,
     )
 
@@ -62,20 +63,20 @@ class User(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
-    
+
     hashed_password: Mapped[str] = mapped_column(
-    String(255),
-    nullable=False,
-)
+        String(255),
+        nullable=False,
+    )
 
-role: Mapped[str] = mapped_column(
-    String(50),
-    default="user",
-    nullable=False,
-)
+    role: Mapped[str] = mapped_column(
+        String(50),
+        default="user",
+        nullable=False,
+    )
 
-is_active: Mapped[bool] = mapped_column(
-    Boolean,
-    default=True,
-    nullable=False,
-)
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
