@@ -16,7 +16,6 @@ class Settings(BaseSettings):
     frontend_origin: str = "http://localhost:3000"
 
     secret_key: str
-
     access_token_expire_minutes: int = 60
     jwt_algorithm: str = "HS256"
 
