@@ -43,3 +43,6 @@ uploads/
 # Temporary
 tmp/
 temp/
+
+# Frontend
+.env.local
