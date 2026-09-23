@@ -1,16 +1,18 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 
-import { registerUser } from "@/services/auth-service";
+import { removeToken, saveToken } from "@/lib/auth";
+import {
+  getCurrentUser,
+  loginUser,
+} from "@/services/auth-service";
 
 
-export default function RegisterPage() {
-  const [fullName, setFullName] = useState("");
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [district, setDistrict] = useState("");
-  const [userType, setUserType] = useState("household");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -27,25 +29,26 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await registerUser({
-        full_name: fullName,
+      const response = await loginUser({
         email,
         password,
-        district: district || undefined,
-        user_type: userType,
       });
 
-      setSuccess("Account created successfully.");
-      setFullName("");
-      setEmail("");
+      saveToken(response.access_token);
+
+      const currentUser = await getCurrentUser();
+
+      setSuccess(
+        `Welcome back, ${currentUser.full_name}. You are signed in.`
+      );
       setPassword("");
-      setDistrict("");
-      setUserType("household");
     } catch (err) {
+      removeToken();
+
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Registration failed");
+        setError("Login failed");
       }
     } finally {
       setLoading(false);
@@ -62,11 +65,11 @@ export default function RegisterPage() {
           </p>
 
           <h1 className="mt-2 text-3xl font-semibold text-white">
-            Create your account
+            Welcome back
           </h1>
 
           <p className="mt-2 text-sm text-neutral-400">
-            Start building your renewable energy profile.
+            Sign in to your renewable energy dashboard.
           </p>
         </div>
 
@@ -75,77 +78,41 @@ export default function RegisterPage() {
           className="space-y-5"
         >
           <div>
-            <label className="text-sm text-neutral-300">
-              Full name
-            </label>
-
-            <input
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-neutral-300">
+            <label
+              htmlFor="email"
+              className="text-sm text-neutral-300"
+            >
               Email
             </label>
 
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
               className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white"
             />
           </div>
 
           <div>
-            <label className="text-sm text-neutral-300">
+            <label
+              htmlFor="password"
+              className="text-sm text-neutral-300"
+            >
               Password
             </label>
 
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={8}
+              autoComplete="current-password"
               className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white"
             />
-          </div>
-
-          <div>
-            <label className="text-sm text-neutral-300">
-              District
-            </label>
-
-            <input
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-neutral-300">
-              User type
-            </label>
-
-            <select
-              value={userType}
-              onChange={(e) => setUserType(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-3 text-white"
-            >
-              <option value="household">
-                Household
-              </option>
-
-              <option value="business">
-                Business
-              </option>
-            </select>
           </div>
 
           {error && (
@@ -165,11 +132,19 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full rounded-lg bg-emerald-500 px-4 py-3 font-medium text-black disabled:opacity-50"
           >
-            {loading
-              ? "Creating account..."
-              : "Create account"}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
+
+        <p className="mt-6 text-center text-sm text-neutral-400">
+          New to HelioSL?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-emerald-400 hover:text-emerald-300"
+          >
+            Create an account
+          </Link>
+        </p>
       </div>
     </main>
   );

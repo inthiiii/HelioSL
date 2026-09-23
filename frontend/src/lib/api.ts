@@ -4,6 +4,25 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   "http://127.0.0.1:8000/api/v1";
 
+type ApiErrorResponse = {
+  detail?: string | Array<{ msg?: string }>;
+};
+
+function getErrorMessage(data: ApiErrorResponse): string {
+  if (typeof data.detail === "string") {
+    return data.detail;
+  }
+
+  if (Array.isArray(data.detail)) {
+    return data.detail
+      .map((item) => item.msg)
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  return "Request failed";
+}
+
 export async function apiRequest<T>(
   path: string,
   options: RequestInit = {}
@@ -32,8 +51,8 @@ export async function apiRequest<T>(
     let message = "Request failed";
 
     try {
-      const data = await response.json();
-      message = data.detail ?? message;
+      const data = (await response.json()) as ApiErrorResponse;
+      message = getErrorMessage(data);
     } catch {
       // Ignore JSON parse failure.
     }
