@@ -1,16 +1,37 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 import { removeToken } from "@/lib/auth";
 
 
+const navigation = [
+  {
+    name: "Overview",
+    href: "/dashboard",
+  },
+  {
+    name: "Energy",
+    href: "/energy",
+  },
+  {
+    name: "Solar",
+    href: "/solar",
+  },
+  {
+    name: "AI Assistant",
+    href: "/assistant",
+  },
+];
+
+
 export function Sidebar() {
+  const pathname = usePathname();
   const router = useRouter();
 
   function logout() {
     removeToken();
-
     router.push("/login");
   }
 
@@ -26,34 +47,24 @@ export function Sidebar() {
         </h2>
       </div>
 
-      <nav className="mt-10 space-y-3 text-sm">
-        <a
-          href="/dashboard"
-          className="block rounded-lg bg-neutral-800 px-4 py-3 text-white"
-        >
-          Overview
-        </a>
+      <nav className="mt-10 space-y-2">
+        {navigation.map((item) => {
+          const active = pathname === item.href;
 
-        <a
-          href="#"
-          className="block px-4 py-3 text-neutral-400"
-        >
-          Energy
-        </a>
-
-        <a
-          href="#"
-          className="block px-4 py-3 text-neutral-400"
-        >
-          Solar
-        </a>
-
-        <a
-          href="#"
-          className="block px-4 py-3 text-neutral-400"
-        >
-          AI Assistant
-        </a>
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`block rounded-lg px-4 py-3 text-sm transition ${
+                active
+                  ? "bg-neutral-800 text-white"
+                  : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
+              }`}
+            >
+              {item.name}
+            </Link>
+          );
+        })}
       </nav>
 
       <button
