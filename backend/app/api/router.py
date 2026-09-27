@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    analytics,
     assistant,
     auth,
     energy,
@@ -41,6 +42,12 @@ api_router.include_router(
     solar.router,
     prefix="/solar",
     tags=["Solar"],
+)
+
+api_router.include_router(
+    analytics.router,
+    prefix="/analytics",
+    tags=["Energy Intelligence"],
 )
 
 api_router.include_router(
