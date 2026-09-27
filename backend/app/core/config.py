@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     secret_key: str
     access_token_expire_minutes: int = 60
     jwt_algorithm: str = "HS256"
+    
+    llm_provider: str = "ollama"
+    llm_model: str = "llama3.2"
+    ollama_base_url: str = "http://127.0.0.1:11434"
+    llm_timeout_seconds: int = 60
+    llm_temperature: float = 0.2
 
     model_config = SettingsConfigDict(
         env_file=".env",
