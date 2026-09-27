@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api";
+
 import type {
   ConsumptionRecord,
   EnergyProfile,

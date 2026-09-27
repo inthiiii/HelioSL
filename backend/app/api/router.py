@@ -8,6 +8,15 @@ from app.api.routes import (
     users,
 )
 
+from app.api.routes import (
+    analytics,
+    auth,
+    energy,
+    health,
+    solar,
+    users,
+)
+
 
 api_router = APIRouter()
 
@@ -40,4 +49,10 @@ api_router.include_router(
     solar.router,
     prefix="/solar",
     tags=["Solar"],
+)
+
+api_router.include_router(
+    analytics.router,
+    prefix="/analytics",
+    tags=["Energy Intelligence"],
 )
