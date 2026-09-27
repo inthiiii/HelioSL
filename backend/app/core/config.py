@@ -19,11 +19,18 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     jwt_algorithm: str = "HS256"
     
+    # LLM Configuration
     llm_provider: str = "ollama"
     llm_model: str = "llama3.2"
     ollama_base_url: str = "http://127.0.0.1:11434"
     llm_timeout_seconds: int = 60
     llm_temperature: float = 0.2
+    
+    # RAG / Embedding Configuraiton
+    embedding_model: str = "nomic-embed-text"
+    rag_top_k: int = 5
+    rag_chunk_size: int = 800
+    rag_chunk_overlap: int = 120
 
     model_config = SettingsConfigDict(
         env_file=".env",
