@@ -1,12 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import {
+  FormEvent,
+  useState,
+} from "react";
 
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { sendAssistantMessage } from "@/services/assistant-service";
+
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
 
 
 export default function AssistantPage() {
-  const [message, setMessage] = useState("");
+  const [input, setInput] =
+    useState("");
+
+  const [messages, setMessages] =
+    useState<Message[]>([]);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    const message = input.trim();
+
+    if (!message || loading) {
+      return;
+    }
+
+    setMessages((current) => [
+      ...current,
+      {
+        role: "user",
+        content: message,
+      },
+    ]);
+
+    setInput("");
+    setError("");
+    setLoading(true);
+
+    try {
+      const response =
+        await sendAssistantMessage(
+          message
+        );
+
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: response.message,
+        },
+      ]);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "HelioSL AI request failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
 
   return (
@@ -22,44 +90,79 @@ export default function AssistantPage() {
           </h1>
 
           <p className="mt-2 text-neutral-400">
-            Ask questions about your energy usage,
-            solar system, and renewable energy.
+            General LLM and NLP intelligence.
+            Trusted retrieval will be added next.
           </p>
         </div>
 
-        <div className="mt-8 flex-1 rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
-          <div className="flex h-full items-center justify-center">
-            <div className="max-w-md text-center">
-              <p className="text-lg font-medium text-white">
-                HelioSL Intelligence
-              </p>
+        <div className="mt-8 flex-1 overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+          {messages.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="max-w-lg text-center">
+                <h2 className="text-xl font-medium text-white">
+                  Ask HelioSL
+                </h2>
 
-              <p className="mt-2 text-sm text-neutral-400">
-                LLM, retrieval and multi-agent intelligence
-                will be connected in the upcoming phases.
-              </p>
+                <p className="mt-3 text-sm text-neutral-400">
+                  Try asking about solar generation,
+                  electricity consumption, solar capacity,
+                  or renewable energy concepts.
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-5">
+              {messages.map(
+                (message, index) => (
+                  <div
+                    key={index}
+                    className={
+                      message.role === "user"
+                        ? "ml-auto max-w-2xl rounded-2xl bg-emerald-500 p-4 text-black"
+                        : "max-w-2xl rounded-2xl bg-neutral-800 p-4 text-neutral-100"
+                    }
+                  >
+                    {message.content}
+                  </div>
+                )
+              )}
+
+              {loading && (
+                <div className="max-w-2xl rounded-2xl bg-neutral-800 p-4 text-neutral-400">
+                  HelioSL is thinking...
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="mt-5 flex gap-3">
+        {error && (
+          <p className="mt-3 text-sm text-red-400">
+            {error}
+          </p>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-5 flex gap-3"
+        >
           <input
-            value={message}
-            onChange={(e) =>
-              setMessage(e.target.value)
+            value={input}
+            onChange={(event) =>
+              setInput(event.target.value)
             }
             placeholder="Ask HelioSL..."
-            disabled
-            className="flex-1 rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4 text-white disabled:opacity-60"
+            className="flex-1 rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4 text-white"
           />
 
           <button
-            disabled
+            type="submit"
+            disabled={loading}
             className="rounded-xl bg-emerald-500 px-6 font-medium text-black disabled:opacity-50"
           >
             Send
           </button>
-        </div>
+        </form>
       </div>
     </DashboardShell>
   );
