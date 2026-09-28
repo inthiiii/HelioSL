@@ -10,10 +10,17 @@ from app.models.solar import (
 
 from app.models.user import User
 
+from app.models.knowledge import (
+    KnowledgeChunk,
+    KnowledgeDocument,
+)
+
 __all__ = [
     "User",
     "EnergyProfile",
     "ConsumptionRecord",
     "SolarSystem",
     "SolarGenerationRecord",
+    "KnowledgeChunk",
+    "KnowledgeDocument",
 ]
