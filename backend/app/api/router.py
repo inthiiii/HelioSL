@@ -6,6 +6,7 @@ from app.api.routes import (
     auth,
     energy,
     health,
+    knowledge,
     solar,
     users,
 )
@@ -54,4 +55,10 @@ api_router.include_router(
     assistant.router,
     prefix="/assistant",
     tags=["AI Assistant"],
+)
+
+api_router.include_router(
+    knowledge.router,
+    prefix="/knowledge",
+    tags=["Knowledge Retrieval"],
 )
