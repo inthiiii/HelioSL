@@ -2,20 +2,19 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { removeToken, saveToken } from "@/lib/auth";
-import {
-  getCurrentUser,
-  loginUser,
-} from "@/services/auth-service";
+import { loginUser } from "@/services/auth-service";
 
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
 
@@ -25,7 +24,6 @@ export default function LoginPage() {
     event.preventDefault();
 
     setError("");
-    setSuccess("");
     setLoading(true);
 
     try {
@@ -36,12 +34,7 @@ export default function LoginPage() {
 
       saveToken(response.access_token);
 
-      const currentUser = await getCurrentUser();
-
-      setSuccess(
-        `Welcome back, ${currentUser.full_name}. You are signed in.`
-      );
-      setPassword("");
+      router.replace("/dashboard");
     } catch (err) {
       removeToken();
 
@@ -118,12 +111,6 @@ export default function LoginPage() {
           {error && (
             <p role="alert" className="text-sm text-red-400">
               {error}
-            </p>
-          )}
-
-          {success && (
-            <p role="status" className="text-sm text-emerald-400">
-              {success}
             </p>
           )}
 
