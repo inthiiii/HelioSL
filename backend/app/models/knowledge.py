@@ -13,6 +13,7 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
 )
+from pgvector.sqlalchemy import Vector
 
 from app.models.base import Base
 
@@ -83,4 +84,9 @@ class KnowledgeChunk(Base):
     document = relationship(
         "KnowledgeDocument",
         back_populates="chunks",
+    )
+
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(768),
+        nullable=True,
     )
