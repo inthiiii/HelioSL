@@ -20,6 +20,10 @@ const navigation = [
     href: "/solar",
   },
   {
+    name: "Solar Planner",
+    href: "/planning",
+  },
+  {
     name: "AI Assistant",
     href: "/assistant",
   },
