@@ -2,6 +2,11 @@ from pydantic import BaseModel, Field
 
 
 class SolarPlanningRequest(BaseModel):
+    average_monthly_consumption_kwh: float | None = Field(
+        default=None,
+        gt=0,
+    )
+
     system_capacity_kw: float = Field(
         gt=0,
         le=1000,
@@ -67,6 +72,11 @@ class SolarPlanningScenario(BaseModel):
 
 
 class SolarScenarioComparisonRequest(BaseModel):
+    average_monthly_consumption_kwh: float | None = Field(
+        default=None,
+        gt=0,
+    )
+
     capacities_kw: list[float] = Field(
         min_length=1,
         max_length=10,

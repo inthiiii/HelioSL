@@ -1,4 +1,5 @@
 export interface PlanningRequest {
+  average_monthly_consumption_kwh?: number;
   system_capacity_kw: number;
   installation_cost_lkr?: number;
   import_tariff_lkr_per_kwh?: number;

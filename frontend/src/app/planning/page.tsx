@@ -17,6 +17,9 @@ import type {
 
 
 export default function PlanningPage() {
+  const [monthlyConsumption, setMonthlyConsumption] =
+    useState("");
+
   const [capacity, setCapacity] =
     useState("5");
 
@@ -56,6 +59,11 @@ export default function PlanningPage() {
     try {
       const response =
         await calculateScenario({
+          average_monthly_consumption_kwh:
+            monthlyConsumption
+              ? Number(monthlyConsumption)
+              : undefined,
+
           system_capacity_kw:
             Number(capacity),
 
@@ -110,7 +118,8 @@ export default function PlanningPage() {
         <p className="mt-2 max-w-2xl text-neutral-400">
           Explore estimated solar generation,
           electricity coverage, savings and
-          simple payback using your energy profile.
+          simple payback using your energy profile
+          or explicit planning inputs.
         </p>
       </div>
 
@@ -120,6 +129,13 @@ export default function PlanningPage() {
           onSubmit={handleSubmit}
           className="space-y-5 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
         >
+          <Input
+            label="Average monthly consumption (kWh)"
+            value={monthlyConsumption}
+            setValue={setMonthlyConsumption}
+            help="Optional when your energy profile already contains this value."
+          />
+
           <Input
             label="Solar capacity (kW)"
             value={capacity}
@@ -180,12 +196,23 @@ export default function PlanningPage() {
             </p>
           ) : (
             <div className="space-y-5">
+              <div
+                className={`rounded-xl border px-4 py-3 text-sm ${
+                  result.calculation_ready
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                    : "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                }`}
+              >
+                {result.calculation_ready
+                  ? "Energy calculation complete"
+                  : "Calculation incomplete"}
+              </div>
 
               <Metric
                 label="Annual Consumption"
                 value={
-                  result.annual_consumption_kwh
-                    ? `${result.annual_consumption_kwh} kWh`
+                  result.annual_consumption_kwh !== null
+                    ? `${formatNumber(result.annual_consumption_kwh)} kWh`
                     : "Unavailable"
                 }
               />
@@ -193,8 +220,35 @@ export default function PlanningPage() {
               <Metric
                 label="Estimated Solar Generation"
                 value={
-                  result.estimated_annual_generation_kwh
-                    ? `${result.estimated_annual_generation_kwh} kWh`
+                  result.estimated_annual_generation_kwh !== null
+                    ? `${formatNumber(result.estimated_annual_generation_kwh)} kWh`
+                    : "Unavailable"
+                }
+              />
+
+              <Metric
+                label="Self-consumed Solar"
+                value={
+                  result.self_consumed_solar_kwh !== null
+                    ? `${formatNumber(result.self_consumed_solar_kwh)} kWh`
+                    : "Unavailable"
+                }
+              />
+
+              <Metric
+                label="Exported Solar"
+                value={
+                  result.exported_solar_kwh !== null
+                    ? `${formatNumber(result.exported_solar_kwh)} kWh`
+                    : "Unavailable"
+                }
+              />
+
+              <Metric
+                label="Grid Import"
+                value={
+                  result.grid_import_kwh !== null
+                    ? `${formatNumber(result.grid_import_kwh)} kWh`
                     : "Unavailable"
                 }
               />
@@ -202,8 +256,26 @@ export default function PlanningPage() {
               <Metric
                 label="Energy Coverage"
                 value={
-                  result.energy_coverage_percent
-                    ? `${result.energy_coverage_percent}%`
+                  result.energy_coverage_percent !== null
+                    ? `${formatNumber(result.energy_coverage_percent)}%`
+                    : "Unavailable"
+                }
+              />
+
+              <Metric
+                label="Avoided Import Cost"
+                value={
+                  result.avoided_import_cost_lkr !== null
+                    ? `LKR ${formatNumber(result.avoided_import_cost_lkr)}`
+                    : "Unavailable"
+                }
+              />
+
+              <Metric
+                label="Export Income"
+                value={
+                  result.export_income_lkr !== null
+                    ? `LKR ${formatNumber(result.export_income_lkr)}`
                     : "Unavailable"
                 }
               />
@@ -211,8 +283,8 @@ export default function PlanningPage() {
               <Metric
                 label="Estimated Annual Benefit"
                 value={
-                  result.estimated_annual_benefit_lkr
-                    ? `LKR ${result.estimated_annual_benefit_lkr}`
+                  result.estimated_annual_benefit_lkr !== null
+                    ? `LKR ${formatNumber(result.estimated_annual_benefit_lkr)}`
                     : "Unavailable"
                 }
               />
@@ -220,11 +292,17 @@ export default function PlanningPage() {
               <Metric
                 label="Simple Payback"
                 value={
-                  result.simple_payback_years
-                    ? `${result.simple_payback_years} years`
+                  result.simple_payback_years !== null
+                    ? `${formatNumber(result.simple_payback_years)} years`
                     : "Unavailable"
                 }
               />
+
+              {!result.financial_calculation_ready && (
+                <p className="rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-sm text-neutral-400">
+                  Financial estimates are unavailable until all required financial inputs are provided.
+                </p>
+              )}
 
               {result.missing_inputs.length > 0 && (
                 <div>
@@ -261,10 +339,12 @@ function Input({
   label,
   value,
   setValue,
+  help,
 }: {
   label: string;
   value: string;
   setValue: (value: string) => void;
+  help?: string;
 }) {
   return (
     <div>
@@ -281,8 +361,21 @@ function Input({
         }
         className="mt-2 w-full rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-3 text-white"
       />
+
+      {help && (
+        <p className="mt-2 text-xs text-neutral-500">
+          {help}
+        </p>
+      )}
     </div>
   );
+}
+
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("en-LK", {
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
 

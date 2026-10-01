@@ -40,9 +40,13 @@ def create_solar_scenario(
         current_user.id,
     )
 
-    average_consumption = None
+    average_consumption = (
+        data.average_monthly_consumption_kwh
+    )
 
     if (
+        average_consumption is None
+        and
         profile
         and profile.average_monthly_consumption_kwh
         is not None
@@ -74,9 +78,13 @@ def compare_system_sizes(
         current_user.id,
     )
 
-    average_consumption = None
+    average_consumption = (
+        data.average_monthly_consumption_kwh
+    )
 
     if (
+        average_consumption is None
+        and
         profile
         and profile.average_monthly_consumption_kwh
         is not None
