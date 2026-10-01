@@ -5,13 +5,39 @@ import {
   useState,
 } from "react";
 
+import {
+  AgentFlow,
+} from "@/components/assistant/agent-flow";
+import type {
+  AgentStage,
+} from "@/components/assistant/agent-flow";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { sendAssistantMessage } from "@/services/assistant-service";
+import {
+  streamAssistantMessage,
+} from "@/services/assistant-service";
+import type {
+  AgenticAssistantResponse,
+} from "@/types/assistant";
 
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  sources?: AgenticAssistantResponse["sources"];
+}
+
+
+function initialAgentStages(): AgentStage[] {
+  return [
+    { id: "nlp", label: "Query Analysis", status: "waiting" },
+    { id: "orchestrator", label: "Orchestrator", status: "waiting" },
+    { id: "energy", label: "Energy Intelligence", status: "waiting" },
+    { id: "weather", label: "Weather Intelligence", status: "waiting" },
+    { id: "knowledge", label: "Knowledge Retrieval", status: "waiting" },
+    { id: "financial", label: "Financial Planning", status: "waiting" },
+    { id: "generate", label: "Response Synthesis", status: "waiting" },
+    { id: "safety", label: "Safety Verification", status: "waiting" },
+  ];
 }
 
 
@@ -27,6 +53,9 @@ export default function AssistantPage() {
 
   const [error, setError] =
     useState("");
+
+  const [stages, setStages] =
+    useState<AgentStage[]>([]);
 
 
   async function handleSubmit(
@@ -50,12 +79,26 @@ export default function AssistantPage() {
 
     setInput("");
     setError("");
+    setStages(initialAgentStages());
     setLoading(true);
 
     try {
       const response =
-        await sendAssistantMessage(
-          message
+        await streamAssistantMessage(
+          message,
+          (stage) => {
+            setStages((current) =>
+              current.map((item) =>
+                item.id === stage.agent
+                  ? {
+                      ...item,
+                      label: stage.label,
+                      status: stage.status,
+                    }
+                  : item
+              )
+            );
+          }
         );
 
       setMessages((current) => [
@@ -63,6 +106,7 @@ export default function AssistantPage() {
         {
           role: "assistant",
           content: response.message,
+          sources: response.sources,
         },
       ]);
     } catch (err) {
@@ -122,15 +166,48 @@ export default function AssistantPage() {
                         : "max-w-2xl rounded-2xl bg-neutral-800 p-4 text-neutral-100"
                     }
                   >
-                    {message.content}
+                    <p>{message.content}</p>
+
+                    {message.role === "assistant" &&
+                      message.sources &&
+                      message.sources.length > 0 && (
+                        <div className="mt-4 border-t border-neutral-700 pt-3">
+                          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                            Trusted sources
+                          </p>
+
+                          <ul className="mt-2 space-y-2 text-sm">
+                            {message.sources.map((source, sourceIndex) => (
+                              <li key={source.document_id ?? sourceIndex}>
+                                {source.source_url ? (
+                                  <a
+                                    href={source.source_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-emerald-300 underline decoration-emerald-600 underline-offset-2"
+                                  >
+                                    {source.title ?? "Official source"}
+                                  </a>
+                                ) : (
+                                  <span>{source.title ?? "Official source"}</span>
+                                )}
+
+                                <span className="ml-2 text-xs text-neutral-400">
+                                  {[source.organization, source.published_year]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                 )
               )}
 
-              {loading && (
-                <div className="max-w-2xl rounded-2xl bg-neutral-800 p-4 text-neutral-400">
-                  HelioSL is thinking...
-                </div>
+              {stages.length > 0 && (
+                <AgentFlow stages={stages} />
               )}
             </div>
           )}
