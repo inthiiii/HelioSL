@@ -45,10 +45,15 @@ def geocode_location(
 def get_weather_context(
     location: str,
 ) -> dict:
-
-    coordinates = geocode_location(
-        location
-    )
+    try:
+        coordinates = geocode_location(
+            location
+        )
+    except httpx.HTTPError:
+        return {
+            "available": False,
+            "reason": "Weather service unavailable",
+        }
 
     if not coordinates:
         return {
@@ -58,28 +63,34 @@ def get_weather_context(
 
     latitude, longitude = coordinates
 
-    response = httpx.get(
-        FORECAST_URL,
-        params={
-            "latitude": latitude,
-            "longitude": longitude,
-            "current": (
-                "temperature_2m,"
-                "relative_humidity_2m,"
-                "cloud_cover,"
-                "precipitation,"
-                "weather_code"
-            ),
-            "daily": (
-                "shortwave_radiation_sum,"
-                "precipitation_sum"
-            ),
-            "timezone": "auto",
-        },
-        timeout=10,
-    )
+    try:
+        response = httpx.get(
+            FORECAST_URL,
+            params={
+                "latitude": latitude,
+                "longitude": longitude,
+                "current": (
+                    "temperature_2m,"
+                    "relative_humidity_2m,"
+                    "cloud_cover,"
+                    "precipitation,"
+                    "weather_code"
+                ),
+                "daily": (
+                    "shortwave_radiation_sum,"
+                    "precipitation_sum"
+                ),
+                "timezone": "auto",
+            },
+            timeout=10,
+        )
 
-    response.raise_for_status()
+        response.raise_for_status()
+    except httpx.HTTPError:
+        return {
+            "available": False,
+            "reason": "Weather service unavailable",
+        }
 
     data = response.json()
 

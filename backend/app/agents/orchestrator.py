@@ -31,6 +31,18 @@ def orchestrator_agent(
         )
     )
 
+    scheme_decision_requested = any(
+        term in query
+        for term in (
+            "which scheme",
+            "suitable",
+            "recommend",
+            "choose",
+            "best scheme",
+            "for me",
+        )
+    )
+
     if intent == "energy_usage":
         selected_agents.append(
             "energy"
@@ -51,12 +63,14 @@ def orchestrator_agent(
         )
 
     elif intent == "solar_scheme":
-        selected_agents.extend(
-            [
-                "knowledge",
-                "financial",
-            ]
+        selected_agents.append(
+            "knowledge"
         )
+
+        if scheme_decision_requested:
+            selected_agents.append(
+                "financial"
+            )
 
     elif intent == "financial":
         selected_agents.extend(

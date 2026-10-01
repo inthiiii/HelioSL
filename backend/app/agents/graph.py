@@ -216,6 +216,9 @@ Rules:
   change happened. Never claim one trend caused another.
 - Weather conditions may explain generation changes, but do not present
   them as confirmed causes. Say they may have contributed.
+- When trusted documents conflict, prefer the lower authority level number.
+  If authority is equal, prefer the latest effective date, then the latest
+  published year. State that a conflict exists instead of hiding it.
 - If the Knowledge Agent result_count is zero, explicitly say that no
   trusted source is available to verify causes, schemes or current rules.
   Do not cite or invent sources.
