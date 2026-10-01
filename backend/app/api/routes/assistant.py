@@ -77,6 +77,7 @@ def run_agentic_assistant(
             [],
         ),
         energy_result=result.get("energy_result"),
+        weather_result=result.get("weather_result"),
         knowledge_result=result.get(
             "knowledge_result"
         ),

@@ -15,6 +15,7 @@ class AgentState(TypedDict, total=False):
     energy_result: dict[str, Any]
     knowledge_result: dict[str, Any]
     financial_result: dict[str, Any]
+    weather_result: dict[str, Any]
 
     combined_context: str
 

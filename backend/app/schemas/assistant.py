@@ -27,6 +27,7 @@ class AgenticResponse(BaseModel):
     normalized_query: str
     selected_agents: list[str]
     energy_result: dict[str, Any] | None = None
+    weather_result: dict[str, Any] | None = None
     knowledge_result: dict[str, Any] | None = None
     financial_result: dict[str, Any] | None = None
     sources: list[dict[str, Any]]

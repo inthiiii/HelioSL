@@ -36,6 +36,14 @@ def search_knowledge(
             RetrievedSource(
                 title=chunk.document.title,
                 organization=chunk.document.organization,
+                published_year=chunk.document.published_year,
+                effective_date=(
+                    chunk.document.effective_date.isoformat()
+                    if chunk.document.effective_date
+                    else None
+                ),
+                document_type=chunk.document.document_type,
+                authority_level=chunk.document.authority_level,
                 source_url=chunk.document.source_url,
                 chunk=chunk.content,
             )

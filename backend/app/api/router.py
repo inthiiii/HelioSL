@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.routes import (
     analytics,
     assistant,
+    assistant_stream,
     auth,
     energy,
     health,
@@ -53,6 +54,12 @@ api_router.include_router(
 
 api_router.include_router(
     assistant.router,
+    prefix="/assistant",
+    tags=["AI Assistant"],
+)
+
+api_router.include_router(
+    assistant_stream.router,
     prefix="/assistant",
     tags=["AI Assistant"],
 )

@@ -23,6 +23,7 @@ def run_knowledge_agent(
 
     context_parts: list[str] = []
     sources: list[dict] = []
+    source_numbers: dict[int, int] = {}
 
     for index, chunk in enumerate(
         chunks,
@@ -30,28 +31,46 @@ def run_knowledge_agent(
     ):
         document = chunk.document
 
+        source_number = source_numbers.get(
+            document.id
+        )
+
+        if source_number is None:
+            source_number = len(sources) + 1
+            source_numbers[document.id] = source_number
+
+            sources.append(
+                {
+                    "number": source_number,
+                    "document_id": document.id,
+                    "title": document.title,
+                    "organization": document.organization,
+                    "published_year": document.published_year,
+                    "effective_date": (
+                        document.effective_date.isoformat()
+                        if document.effective_date
+                        else None
+                    ),
+                    "document_type": document.document_type,
+                    "authority_level": document.authority_level,
+                    "source_url": document.source_url,
+                }
+            )
+
         context_parts.append(
             f"""
-SOURCE {index}
+SOURCE {source_number}, CHUNK {index}
 
 Title: {document.title}
 Organization: {document.organization}
+Published year: {document.published_year}
+Effective date: {document.effective_date or "not specified"}
+Authority level: {document.authority_level}
+Document type: {document.document_type}
 
 Content:
 {chunk.content}
 """.strip()
-        )
-
-        sources.append(
-            {
-                "number": index,
-                "document_id": document.id,
-                "title": document.title,
-                "organization":
-                    document.organization,
-                "source_url":
-                    document.source_url,
-            }
         )
 
     result = {

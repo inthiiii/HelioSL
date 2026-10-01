@@ -16,6 +16,10 @@ class KnowledgeSearchRequest(BaseModel):
 class RetrievedSource(BaseModel):
     title: str
     organization: str | None
+    published_year: int | None
+    effective_date: str | None
+    document_type: str | None
+    authority_level: int | None
     source_url: str | None
     chunk: str
 
