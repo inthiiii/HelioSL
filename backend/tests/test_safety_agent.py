@@ -264,6 +264,7 @@ def test_agentic_api_preserves_schema_for_missing_solar_metrics(
         "normalized_query",
         "selected_agents",
         "energy_result",
+        "weather_result",
         "knowledge_result",
         "financial_result",
         "sources",
