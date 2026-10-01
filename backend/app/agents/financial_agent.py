@@ -15,71 +15,106 @@ def run_financial_agent(
         {},
     )
 
-    average_consumption = energy.get(
-        "average_consumption_kwh"
+    knowledge = state.get(
+        "knowledge_result",
+        {},
     )
 
-    latest_consumption = energy.get(
-        "latest_consumption_kwh"
+    weather = state.get(
+        "weather_result",
+        {},
     )
 
-    average_generation = energy.get(
-        "average_generation_kwh"
+    average_consumption = (
+        energy.get(
+            "average_consumption_kwh"
+        )
     )
 
-    requested_capacity = entities.get(
-        "capacity_kw"
+    requested_capacity = (
+        entities.get(
+            "capacity_kw"
+        )
     )
 
-    estimated_daily_consumption = None
+    requested_energy = (
+        entities.get(
+            "energy_kwh"
+        )
+    )
 
-    if average_consumption is not None:
-        estimated_daily_consumption = round(
-            average_consumption / 30,
-            2,
+    missing_inputs: list[str] = []
+
+    if average_consumption is None:
+        if requested_energy is not None:
+            average_consumption = (
+                requested_energy
+            )
+        else:
+            missing_inputs.append(
+                "monthly_consumption"
+            )
+
+    if requested_capacity is None:
+        missing_inputs.append(
+            "system_capacity_kw"
         )
 
+    trusted_knowledge_available = (
+        knowledge.get(
+            "result_count",
+            0,
+        )
+        > 0
+    )
+
     result = {
-        "average_monthly_consumption_kwh":
+        "monthly_consumption_kwh":
             average_consumption,
-
-        "estimated_daily_consumption_kwh":
-            estimated_daily_consumption,
-
-        "latest_consumption_kwh":
-            latest_consumption,
-
-        "average_generation_kwh":
-            average_generation,
 
         "requested_capacity_kw":
             requested_capacity,
 
+        "trusted_knowledge_available":
+            trusted_knowledge_available,
+
+        "weather_available":
+            weather.get(
+                "available",
+                False,
+            ),
+
         "financial_calculation_ready":
             False,
 
-        "financial_note": (
-            "Verified tariff data, installation "
-            "cost and applicable solar scheme "
-            "information are required before "
-            "calculating an estimated payback "
-            "period."
+        "missing_inputs":
+            missing_inputs,
+
+        "note": (
+            "Full savings and payback estimates "
+            "require verified tariff, export-rate, "
+            "installation-cost and solar-yield "
+            "inputs."
         ),
     }
 
     trace = list(
-        state.get("trace", [])
+        state.get(
+            "trace",
+            [],
+        )
     )
 
     trace.append(
-        "Financial and Solar Planning Agent "
-        "prepared consumption and solar-planning "
-        "context."
+        "Financial & Solar Planning Agent "
+        "evaluated available planning inputs."
     )
 
     return {
         **state,
-        "financial_result": result,
-        "trace": trace,
-    }
+        "financial_result":
+            result,
 
+        "trace":
+            trace,
+    }
