@@ -90,8 +90,8 @@ export default function AssistantPage() {
           </h1>
 
           <p className="mt-2 text-neutral-400">
-            General LLM and NLP intelligence.
-            Trusted retrieval will be added next.
+            Agent-orchestrated energy intelligence,
+            trusted retrieval, and safety review.
           </p>
         </div>
 

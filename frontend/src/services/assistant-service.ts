@@ -1,15 +1,15 @@
 import { apiRequest } from "@/lib/api";
 
 import type {
-  AssistantResponse,
+  AgenticAssistantResponse,
 } from "@/types/assistant";
 
 
 export function sendAssistantMessage(
   message: string
 ) {
-  return apiRequest<AssistantResponse>(
-    "/assistant/analyze",
+  return apiRequest<AgenticAssistantResponse>(
+    "/assistant/agentic",
     {
       method: "POST",
       body: JSON.stringify({
