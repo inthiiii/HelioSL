@@ -7,6 +7,7 @@ from app.api.routes import (
     auth,
     energy,
     health,
+    planning,
     knowledge,
     solar,
     users,
@@ -68,4 +69,10 @@ api_router.include_router(
     knowledge.router,
     prefix="/knowledge",
     tags=["Knowledge Retrieval"],
+)
+
+api_router.include_router(
+    planning.router,
+    prefix="/planning",
+    tags=["Solar & Financial Planning"],
 )
