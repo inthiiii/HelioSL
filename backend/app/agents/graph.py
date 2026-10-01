@@ -33,6 +33,17 @@ from app.llm.client import (
 )
 
 
+def _describe_metric(
+    name: str,
+    value: object,
+    unit: str,
+) -> str:
+    if value is None:
+        return f"- {name}: not available"
+
+    return f"- {name}: {value} {unit}"
+
+
 def build_agent_graph(
     db: Session,
 ):
@@ -112,6 +123,45 @@ def build_agent_graph(
 
         llm = get_llm_client()
 
+        energy_result = state.get(
+            "energy_result",
+            {},
+        )
+
+        measurement_context = f"""
+Measurement interpretation:
+- A metric marked "not available" has no usable recorded value.
+- A missing change percentage means there are not enough usable records
+  to confirm an increase or decrease.
+- A negative numeric change is a measured decrease; zero or a positive
+  change is not a measured decrease.
+- Change percentages compare the latest record with the immediately
+  preceding record, not with an average or a previous year.
+- Trends describe observations only and do not establish causes.
+
+Available Energy Agent metrics:
+{_describe_metric(
+    "latest consumption",
+    energy_result.get("latest_consumption_kwh"),
+    "kWh",
+)}
+{_describe_metric(
+    "consumption change",
+    energy_result.get("consumption_change_percent"),
+    "%",
+)}
+{_describe_metric(
+    "latest solar generation",
+    energy_result.get("latest_generation_kwh"),
+    "kWh",
+)}
+{_describe_metric(
+    "solar generation change",
+    energy_result.get("generation_change_percent"),
+    "%",
+)}
+"""
+
         prompt = f"""
 User question:
 {state.get("original_query")}
@@ -128,6 +178,8 @@ Knowledge Agent:
 Financial & Solar Planning Agent:
 {state.get("financial_result", {})}
 
+{measurement_context}
+
 Generate a concise renewable-energy decision-support response.
 
 Rules:
@@ -136,6 +188,23 @@ Rules:
 - If official information is unavailable, say so.
 - Do not give dangerous electrical repair instructions.
 - Financial estimates must clearly state assumptions.
+- Treat each change percentage as the latest record compared with
+  the immediately preceding record. Never describe it as year-over-year
+  or as the same period last year.
+- Observed consumption and generation trends do not establish why a
+  change happened. Never claim one trend caused another.
+- If the Knowledge Agent result_count is zero, explicitly say that no
+  trusted source is available to verify causes, schemes or current rules.
+  Do not cite or invent sources.
+- If financial_calculation_ready is false, do not conclude that a solar
+  capacity is suitable, sufficient or insufficient, and do not estimate
+  savings or payback. State what verified information is still required.
+- Never display Python None or JSON null as a measurement. Describe the
+  specific metric as unavailable instead.
+- Never say that a decrease was measured unless the relevant change
+  percentage is present, numeric and negative.
+- Do not say all Energy Agent data is unavailable when some metrics are
+  present. Accurately distinguish present metrics from missing metrics.
 """
 
         answer = llm.generate(
