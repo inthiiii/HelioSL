@@ -3,7 +3,7 @@ from app.agents.financial_agent import (
 )
 
 
-def test_financial_agent_consumption_conversion():
+def test_financial_agent_uses_available_planning_inputs():
 
     state = {
         "energy_result": {
@@ -25,12 +25,7 @@ def test_financial_agent_consumption_conversion():
         "financial_result"
     ]
 
-    assert (
-        financial[
-            "estimated_daily_consumption_kwh"
-        ]
-        == 15.0
-    )
+    assert financial["monthly_consumption_kwh"] == 450
 
     assert (
         financial[
@@ -38,3 +33,25 @@ def test_financial_agent_consumption_conversion():
         ]
         == 5.0
     )
+
+    assert financial["financial_calculation_ready"] is False
+    assert financial["missing_inputs"] == []
+
+
+def test_financial_agent_identifies_missing_core_inputs():
+    result = run_financial_agent(
+        {
+            "energy_result": {},
+            "entities": {},
+            "trace": [],
+        }
+    )
+
+    financial = result["financial_result"]
+
+    assert financial["monthly_consumption_kwh"] is None
+    assert financial["requested_capacity_kw"] is None
+    assert financial["missing_inputs"] == [
+        "monthly_consumption",
+        "system_capacity_kw",
+    ]
