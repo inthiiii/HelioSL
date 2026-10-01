@@ -1,10 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
+from app.agents.graph import build_agent_graph
+from app.agents.state import AgentState
 from app.core.config import settings
+from app.core.database import get_db
 from app.llm.client import get_llm_client
 from app.models.user import User
 from app.nlp.pipeline import analyze_text
 from app.schemas.assistant import (
+    AgenticResponse,
     AssistantRequest,
     AssistantResponse,
 )
@@ -28,6 +33,67 @@ For this development phase:
 
 Keep answers concise and useful.
 """
+
+
+@router.post(
+    "/agentic",
+    response_model=AgenticResponse,
+)
+def run_agentic_assistant(
+    data: AssistantRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> AgenticResponse:
+    analysis = analyze_text(data.message)
+
+    initial_state: AgentState = {
+        "user_id": current_user.id,
+        "original_query": data.message,
+        "normalized_query": analysis[
+            "normalized_query"
+        ],
+        "intent": analysis["intent"],
+        "entities": analysis["entities"],
+        "trace": [
+            "NLP normalized the query, classified "
+            "the intent and extracted entities."
+        ],
+    }
+
+    result = build_agent_graph(db).invoke(
+        initial_state
+    )
+
+    return AgenticResponse(
+        message=result.get("final_answer", ""),
+        intent=result.get("intent", "general"),
+        entities=result.get("entities", {}),
+        normalized_query=result.get(
+            "normalized_query",
+            data.message,
+        ),
+        selected_agents=result.get(
+            "selected_agents",
+            [],
+        ),
+        energy_result=result.get("energy_result"),
+        knowledge_result=result.get(
+            "knowledge_result"
+        ),
+        financial_result=result.get(
+            "financial_result"
+        ),
+        sources=result.get("sources", []),
+        safety_passed=result.get(
+            "safety_passed",
+            False,
+        ),
+        safety_notes=result.get(
+            "safety_notes",
+            [],
+        ),
+        trace=result.get("trace", []),
+    )
 
 
 @router.get("/health")
