@@ -12,16 +12,41 @@ def orchestrator_agent(
 
     selected_agents: list[str] = []
 
+    query = (
+        state.get("normalized_query")
+        or state.get("original_query", "")
+    ).lower()
+
+    weather_mentioned = any(
+        term in query
+        for term in (
+            "weather",
+            "cloud",
+            "rain",
+            "temperature",
+            "humidity",
+            "sunlight",
+            "sunshine",
+            "irradiance",
+        )
+    )
+
     if intent == "energy_usage":
         selected_agents.append(
             "energy"
         )
+
+        if weather_mentioned:
+            selected_agents.append(
+                "weather"
+            )
 
     elif intent == "solar_performance":
         selected_agents.extend(
             [
                 "energy",
                 "knowledge",
+                "weather",
             ]
         )
 
@@ -48,6 +73,7 @@ def orchestrator_agent(
                 "energy",
                 "knowledge",
                 "financial",
+                "weather",
             ]
         )
 
