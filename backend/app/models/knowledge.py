@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -34,6 +35,22 @@ class KnowledgeDocument(Base):
         String(100),
     )
 
+    published_year: Mapped[int | None] = mapped_column(
+        Integer,
+    )
+
+    effective_date: Mapped[date | None] = mapped_column(
+        Date,
+    )
+
+    document_type: Mapped[str | None] = mapped_column(
+        String(50),
+    )
+
+    authority_level: Mapped[int | None] = mapped_column(
+        Integer,
+    )
+
     source_url: Mapped[str | None] = mapped_column(
         Text,
     )
@@ -41,6 +58,7 @@ class KnowledgeDocument(Base):
     filename: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
+        unique=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
