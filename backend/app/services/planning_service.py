@@ -1,6 +1,7 @@
 from app.schemas.planning import (
     SolarPlanningRequest,
     SolarPlanningScenario,
+    SolarScenarioComparisonRequest,
 )
 
 
@@ -225,3 +226,51 @@ def calculate_solar_scenario(
         assumptions=
             assumptions,
     )
+    
+def compare_solar_scenarios(
+    average_monthly_consumption_kwh: float | None,
+    data: SolarScenarioComparisonRequest,
+) -> list[SolarPlanningScenario]:
+
+    scenarios: list[SolarPlanningScenario] = []
+
+    for capacity in data.capacities_kw:
+
+        installation_cost = None
+
+        if data.installation_costs_lkr:
+            installation_cost = (
+                data.installation_costs_lkr.get(
+                    str(capacity)
+                )
+            )
+
+        request = SolarPlanningRequest(
+            system_capacity_kw=capacity,
+
+            installation_cost_lkr=
+                installation_cost,
+
+            import_tariff_lkr_per_kwh=
+                data.import_tariff_lkr_per_kwh,
+
+            export_rate_lkr_per_kwh=
+                data.export_rate_lkr_per_kwh,
+
+            specific_yield_kwh_per_kw_year=
+                data.specific_yield_kwh_per_kw_year,
+
+            self_consumption_ratio=
+                data.self_consumption_ratio,
+        )
+
+        scenario = calculate_solar_scenario(
+            average_monthly_consumption_kwh,
+            request,
+        )
+
+        scenarios.append(
+            scenario
+        )
+
+    return scenarios
