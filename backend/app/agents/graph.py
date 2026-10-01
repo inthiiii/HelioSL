@@ -28,6 +28,10 @@ from app.agents.safety_agent import (
 
 from app.agents.state import AgentState
 
+from app.agents.weather_agent import (
+    run_weather_agent,
+)
+
 from app.llm.client import (
     get_llm_client,
 )
@@ -72,6 +76,20 @@ def build_agent_graph(
         return run_energy_agent(
             state,
             db,
+        )
+
+    def weather_node(
+        state: AgentState,
+    ) -> AgentState:
+
+        if "weather" not in state.get(
+            "selected_agents",
+            [],
+        ):
+            return state
+
+        return run_weather_agent(
+            state
         )
 
     def knowledge_node(
@@ -172,6 +190,9 @@ Intent:
 Energy Agent:
 {state.get("energy_result", {})}
 
+Weather Agent:
+{state.get("weather_result", {})}
+
 Knowledge Agent:
 {state.get("knowledge_result", {})}
 
@@ -193,6 +214,8 @@ Rules:
   or as the same period last year.
 - Observed consumption and generation trends do not establish why a
   change happened. Never claim one trend caused another.
+- Weather conditions may explain generation changes, but do not present
+  them as confirmed causes. Say they may have contributed.
 - If the Knowledge Agent result_count is zero, explicitly say that no
   trusted source is available to verify causes, schemes or current rules.
   Do not cite or invent sources.
@@ -248,6 +271,11 @@ Rules:
     )
 
     workflow.add_node(
+        "weather",
+        weather_node,
+    )
+
+    workflow.add_node(
         "knowledge",
         knowledge_node,
     )
@@ -279,6 +307,11 @@ Rules:
 
     workflow.add_edge(
         "energy",
+        "weather",
+    )
+
+    workflow.add_edge(
+        "weather",
         "knowledge",
     )
 
