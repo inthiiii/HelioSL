@@ -65,18 +65,28 @@ def analyze_energy_data(
     )
 
     consumption_change = None
+    consumption_trend_change = None
 
     if len(consumption_values) >= 2:
         consumption_change = percentage_change(
             consumption_values[-2],
             consumption_values[-1],
         )
+        consumption_trend_change = percentage_change(
+            consumption_values[0],
+            consumption_values[-1],
+        )
 
     generation_change = None
+    generation_trend_change = None
 
     if len(generation_values) >= 2:
         generation_change = percentage_change(
             generation_values[-2],
+            generation_values[-1],
+        )
+        generation_trend_change = percentage_change(
+            generation_values[0],
             generation_values[-1],
         )
 
@@ -118,12 +128,12 @@ def analyze_energy_data(
 
         "consumption_trend":
             trend_from_change(
-                consumption_change
+                consumption_trend_change
             ),
 
         "generation_trend":
             trend_from_change(
-                generation_change
+                generation_trend_change
             ),
 
         "generation_anomaly":

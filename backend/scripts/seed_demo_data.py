@@ -16,8 +16,13 @@ from app.models.user import User
 from app.security.password import hash_password
 
 
-HOUSEHOLD_EMAIL = "household.demo@heliosl.local"
-BUSINESS_EMAIL = "business.demo@heliosl.local"
+HOUSEHOLD_EMAIL = "household.demo@heliosl.lk"
+BUSINESS_EMAIL = "business.demo@heliosl.lk"
+
+LEGACY_DEMO_EMAILS = (
+    "household.demo@heliosl.local",
+    "business.demo@heliosl.local",
+)
 
 
 HOUSEHOLD_CONSUMPTION = [
@@ -296,15 +301,15 @@ def main() -> None:
             "Removing previous synthetic demo users..."
         )
 
-        remove_existing_demo_user(
-            db,
+        for email in (
+            *LEGACY_DEMO_EMAILS,
             HOUSEHOLD_EMAIL,
-        )
-
-        remove_existing_demo_user(
-            db,
             BUSINESS_EMAIL,
-        )
+        ):
+            remove_existing_demo_user(
+                db,
+                email,
+            )
 
         print(
             "Creating household demo..."

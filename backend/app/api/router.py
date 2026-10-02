@@ -7,6 +7,7 @@ from app.api.routes import (
     auth,
     energy,
     health,
+    integration,
     planning,
     knowledge,
     solar,
@@ -51,6 +52,12 @@ api_router.include_router(
     analytics.router,
     prefix="/analytics",
     tags=["Energy Intelligence"],
+)
+
+api_router.include_router(
+    integration.router,
+    prefix="/integration",
+    tags=["Integrated Intelligence"],
 )
 
 api_router.include_router(
