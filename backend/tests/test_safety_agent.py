@@ -119,7 +119,51 @@ def test_dangerous_electrical_instruction_is_replaced():
     assert "touch the wires" not in result["final_answer"]
     assert result["safety_notes"] == [
         "Potentially unsafe electrical instruction detected.",
+        (
+            "Insufficient user energy history for "
+            "a data-supported conclusion."
+        ),
     ]
+
+
+def test_overconfident_claim_is_flagged():
+    result = safety_agent(
+        {
+            "intent": "general",
+            "selected_agents": [],
+            "draft_answer": (
+                "This inverter is definitely faulty."
+            ),
+            "trace": [],
+        }
+    )
+
+    assert result["safety_passed"] is True
+    assert (
+        "Potentially overconfident AI claim detected."
+        in result["safety_notes"]
+    )
+
+
+def test_missing_energy_history_is_flagged():
+    result = safety_agent(
+        {
+            "intent": "general",
+            "selected_agents": ["energy"],
+            "energy_result": {
+                "latest_consumption_kwh": None,
+                "latest_generation_kwh": None,
+            },
+            "draft_answer": "More data is required.",
+            "trace": [],
+        }
+    )
+
+    assert (
+        "Insufficient user energy history for "
+        "a data-supported conclusion."
+        in result["safety_notes"]
+    )
 
 
 def test_missing_scheme_sources_prevent_scheme_recommendation():
@@ -142,6 +186,16 @@ def test_missing_scheme_sources_prevent_scheme_recommendation():
 
     assert "cannot recommend a scheme" in result["final_answer"]
     assert "Choose Net Accounting" not in result["final_answer"]
+    assert (
+        "Knowledge-based claims could not be verified "
+        "against trusted sources."
+        in result["safety_notes"]
+    )
+    assert (
+        "Financial recommendation is incomplete because "
+        "verified planning inputs are missing."
+        in result["safety_notes"]
+    )
 
 
 def test_incomplete_planning_evidence_prevents_capacity_judgment():
@@ -273,6 +327,7 @@ def test_agentic_api_preserves_schema_for_missing_solar_metrics(
         "knowledge_result",
         "financial_result",
         "sources",
+        "confidence",
         "safety_passed",
         "safety_notes",
         "trace",
@@ -280,3 +335,4 @@ def test_agentic_api_preserves_schema_for_missing_solar_metrics(
     assert "No solar-generation records" in data["message"]
     assert "None kWh" not in data["message"]
     assert "measured decrease" not in data["message"]
+    assert data["confidence"] == "low"

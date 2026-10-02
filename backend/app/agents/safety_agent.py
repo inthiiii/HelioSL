@@ -10,6 +10,14 @@ DANGEROUS_PHRASES = [
     "open the electrical panel",
 ]
 
+OVERCONFIDENT_PHRASES = [
+    "definitely faulty",
+    "guaranteed savings",
+    "guaranteed return",
+    "100% certain",
+    "will definitely",
+]
+
 
 def _format_measurement(
     value: object,
@@ -196,13 +204,20 @@ def safety_agent(
             "instruction detected."
         )
 
-    knowledge_used = (
-        "knowledge"
-        in state.get(
-            "selected_agents",
-            [],
+    if any(
+        phrase in answer_lower
+        for phrase in OVERCONFIDENT_PHRASES
+    ):
+        notes.append(
+            "Potentially overconfident AI claim detected."
         )
+
+    selected = state.get(
+        "selected_agents",
+        [],
     )
+
+    knowledge_used = "knowledge" in selected
 
     sources = state.get(
         "sources",
@@ -211,9 +226,8 @@ def safety_agent(
 
     if knowledge_used and not sources:
         notes.append(
-            "No trusted retrieval source was "
-            "available for the knowledge-based "
-            "part of this response."
+            "Knowledge-based claims could not be "
+            "verified against trusted sources."
         )
 
     financial_result = state.get(
@@ -227,17 +241,31 @@ def safety_agent(
     )
 
     if (
-        "financial"
-        in state.get(
-            "selected_agents",
-            [],
-        )
+        "financial" in selected
         and not financial_ready
     ):
         notes.append(
-            "Financial result is preliminary "
-            "because verified tariff or cost "
-            "information is unavailable."
+            "Financial recommendation is incomplete "
+            "because verified planning inputs are missing."
+        )
+
+    energy_result = state.get(
+        "energy_result",
+        {},
+    )
+
+    if (
+        "energy" in selected
+        and energy_result.get(
+            "latest_consumption_kwh"
+        ) is None
+        and energy_result.get(
+            "latest_generation_kwh"
+        ) is None
+    ):
+        notes.append(
+            "Insufficient user energy history for "
+            "a data-supported conclusion."
         )
 
     intent = state.get(
@@ -312,9 +340,8 @@ def safety_agent(
     )
 
     trace.append(
-        "Safety & Verification Agent reviewed "
-        "evidence, financial limitations and "
-        "electrical safety."
+        "Safety & Verification Agent performed "
+        "Responsible AI compliance checks."
     )
 
     return {

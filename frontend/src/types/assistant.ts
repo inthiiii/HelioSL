@@ -19,6 +19,7 @@ export interface AgenticAssistantResponse {
     authority_level?: number | null;
     source_url?: string | null;
   }[];
+  confidence: "high" | "medium" | "low";
   safety_passed: boolean;
   safety_notes: string[];
   trace: string[];

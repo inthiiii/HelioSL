@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -31,6 +31,7 @@ class AgenticResponse(BaseModel):
     knowledge_result: dict[str, Any] | None = None
     financial_result: dict[str, Any] | None = None
     sources: list[dict[str, Any]]
+    confidence: Literal["high", "medium", "low"]
     safety_passed: bool
     safety_notes: list[str]
     trace: list[str]

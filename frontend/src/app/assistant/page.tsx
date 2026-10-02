@@ -8,6 +8,9 @@ import {
 import {
   AgentFlow,
 } from "@/components/assistant/agent-flow";
+import {
+  TransparencyPanel,
+} from "@/components/assistant/transparency-panel";
 import type {
   AgentStage,
 } from "@/components/assistant/agent-flow";
@@ -23,7 +26,7 @@ import type {
 interface Message {
   role: "user" | "assistant";
   content: string;
-  sources?: AgenticAssistantResponse["sources"];
+  transparency?: AgenticAssistantResponse;
 }
 
 
@@ -106,7 +109,7 @@ export default function AssistantPage() {
         {
           role: "assistant",
           content: response.message,
-          sources: response.sources,
+          transparency: response,
         },
       ]);
     } catch (err) {
@@ -169,38 +172,10 @@ export default function AssistantPage() {
                     <p>{message.content}</p>
 
                     {message.role === "assistant" &&
-                      message.sources &&
-                      message.sources.length > 0 && (
-                        <div className="mt-4 border-t border-neutral-700 pt-3">
-                          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-                            Trusted sources
-                          </p>
-
-                          <ul className="mt-2 space-y-2 text-sm">
-                            {message.sources.map((source, sourceIndex) => (
-                              <li key={source.document_id ?? sourceIndex}>
-                                {source.source_url ? (
-                                  <a
-                                    href={source.source_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-emerald-300 underline decoration-emerald-600 underline-offset-2"
-                                  >
-                                    {source.title ?? "Official source"}
-                                  </a>
-                                ) : (
-                                  <span>{source.title ?? "Official source"}</span>
-                                )}
-
-                                <span className="ml-2 text-xs text-neutral-400">
-                                  {[source.organization, source.published_year]
-                                    .filter(Boolean)
-                                    .join(" · ")}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                      message.transparency && (
+                        <TransparencyPanel
+                          response={message.transparency}
+                        />
                       )}
                   </div>
                 )

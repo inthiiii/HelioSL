@@ -19,6 +19,9 @@ from app.schemas.assistant import (
 from app.services.audit_service import (
     create_audit_log,
 )
+from app.services.confidence_service import (
+    determine_confidence,
+)
 from app.security.dependencies import get_current_user
 from app.security.prompt_guard import (
     detect_prompt_injection,
@@ -120,6 +123,10 @@ def _agentic_response(
         )
     )
 
+    confidence = determine_confidence(
+        state
+    )
+
     return AgenticResponse(
         message=final_answer,
         intent=state.get("intent", "general"),
@@ -141,6 +148,7 @@ def _agentic_response(
             "financial_result"
         ),
         sources=state.get("sources", []),
+        confidence=confidence,
         safety_passed=state.get(
             "safety_passed",
             False,

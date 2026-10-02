@@ -16,6 +16,9 @@ from app.schemas.assistant import (
 from app.services.audit_service import (
     create_audit_log,
 )
+from app.services.confidence_service import (
+    determine_confidence,
+)
 from app.security.dependencies import get_current_user
 from app.security.prompt_guard import (
     detect_prompt_injection,
@@ -97,6 +100,10 @@ def run_agentic_assistant(
         )
     )
 
+    confidence = determine_confidence(
+        result
+    )
+
     create_audit_log(
         db=db,
         user_id=current_user.id,
@@ -126,6 +133,7 @@ def run_agentic_assistant(
             "financial_result"
         ),
         sources=result.get("sources", []),
+        confidence=confidence,
         safety_passed=result.get(
             "safety_passed",
             False,
