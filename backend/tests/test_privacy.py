@@ -46,6 +46,20 @@ def test_redact_sensitive_data_removes_email_and_jwt():
     )
 
 
+def test_email_redaction():
+    text = (
+        "Contact user@example.com "
+        "for information."
+    )
+
+    result = redact_sensitive_data(
+        text
+    )
+
+    assert "user@example.com" not in result
+    assert "[REDACTED_EMAIL]" in result
+
+
 def test_redact_sensitive_data_preserves_normal_text():
     text = "A 5 kW solar system may generate renewable energy."
 

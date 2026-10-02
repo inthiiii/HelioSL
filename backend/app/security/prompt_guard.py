@@ -5,6 +5,7 @@ SUSPICIOUS_PATTERNS = [
     r"ignore (all|any|the) previous instructions",
     r"ignore your previous instructions",
     r"ignore (the )?(system|developer) instructions",
+    r"ignore heliosl(?:'s|’s)? rules",
     r"forget your instructions",
     r"reveal (the )?system prompt",
     r"show (me )?your system prompt",
@@ -12,8 +13,10 @@ SUSPICIOUS_PATTERNS = [
     r"jailbreak",
     r"bypass (your|the) rules",
     r"act as if you have no restrictions",
+    r"pretend (?:there are|you have) no (?:safety )?rules",
     r"override (the )?system",
     r"reveal hidden instructions",
+    r"reveal all customer data",
 ]
 
 
