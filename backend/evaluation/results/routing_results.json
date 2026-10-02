@@ -1,0 +1,68 @@
+{
+  "total_cases": 5,
+  "correct": 4,
+  "routing_accuracy_percent": 80.0,
+  "cases": [
+    {
+      "query": "Why is my electricity consumption increasing?",
+      "expected_agents": [
+        "energy"
+      ],
+      "actual_agents": [
+        "energy"
+      ],
+      "correct": true
+    },
+    {
+      "query": "Why has my solar generation dropped?",
+      "expected_agents": [
+        "energy",
+        "knowledge",
+        "weather"
+      ],
+      "actual_agents": [
+        "energy",
+        "knowledge",
+        "weather"
+      ],
+      "correct": true
+    },
+    {
+      "query": "Explain Net Metering in Sri Lanka.",
+      "expected_agents": [
+        "knowledge"
+      ],
+      "actual_agents": [
+        "knowledge"
+      ],
+      "correct": true
+    },
+    {
+      "query": "Which solar scheme should I use?",
+      "expected_agents": [
+        "financial",
+        "knowledge"
+      ],
+      "actual_agents": [
+        "knowledge"
+      ],
+      "correct": false
+    },
+    {
+      "query": "Should I install a 5 kW system for 450 kWh monthly use?",
+      "expected_agents": [
+        "energy",
+        "financial",
+        "knowledge",
+        "weather"
+      ],
+      "actual_agents": [
+        "energy",
+        "financial",
+        "knowledge",
+        "weather"
+      ],
+      "correct": true
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "total_cases": 7,
+  "intent_correct": 5,
+  "intent_accuracy_percent": 71.43,
+  "entity_checks": 4,
+  "entity_accuracy_percent": 100.0,
+  "cases": [
+    {
+      "query": "Why is my electricity consumption increasing?",
+      "expected_intent": "energy_usage",
+      "actual_intent": "energy_usage",
+      "intent_correct": true,
+      "entities": {}
+    },
+    {
+      "query": "Why has my solar generation dropped?",
+      "expected_intent": "solar_performance",
+      "actual_intent": "solar_performance",
+      "intent_correct": true,
+      "entities": {}
+    },
+    {
+      "query": "Which solar scheme is suitable for me?",
+      "expected_intent": "solar_scheme",
+      "actual_intent": "solar_scheme",
+      "intent_correct": true,
+      "entities": {}
+    },
+    {
+      "query": "I use 450 kWh every month in Colombo.",
+      "expected_intent": "energy_usage",
+      "actual_intent": "solar_planning",
+      "intent_correct": false,
+      "entities": {
+        "location": {
+          "expected": "Colombo",
+          "actual": "Colombo",
+          "correct": true
+        },
+        "energy_kwh": {
+          "expected": 450.0,
+          "actual": 450.0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "query": "Should I install a 5 kW solar system in Kandy?",
+      "expected_intent": "solar_planning",
+      "actual_intent": "solar_planning",
+      "intent_correct": true,
+      "entities": {
+        "location": {
+          "expected": "Kandy",
+          "actual": "Kandy",
+          "correct": true
+        },
+        "capacity_kw": {
+          "expected": 5.0,
+          "actual": 5.0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "query": "How much money can solar save me?",
+      "expected_intent": "financial",
+      "actual_intent": "general",
+      "intent_correct": false,
+      "entities": {}
+    },
+    {
+      "query": "Explain Net Accounting.",
+      "expected_intent": "solar_scheme",
+      "actual_intent": "solar_scheme",
+      "intent_correct": true,
+      "entities": {}
+    }
+  ]
+}

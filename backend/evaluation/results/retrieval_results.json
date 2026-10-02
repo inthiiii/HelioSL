@@ -1,0 +1,51 @@
+{
+  "metric_note": "Keyword and organization matching is a retrieval success proxy, not human-judged relevance.",
+  "top_k": 5,
+  "total_cases": 3,
+  "successful_cases": 3,
+  "retrieval_success_percent": 100.0,
+  "cases": [
+    {
+      "query": "What is Net Metering?",
+      "result_count": 5,
+      "keyword_match": true,
+      "organization_match": true,
+      "passed": true,
+      "retrieved_titles": [
+        "Guidelines on Rooftop Solar PV System Installation for Utilities — Revision 1",
+        "Guidelines on Rooftop Solar PV System Installation for Utilities — Revision 1",
+        "Guidelines on Rooftop Solar PV System Installation for Utilities — Revision 1",
+        "Guidelines on Rooftop Solar PV System Installation for Utilities — Revision 1",
+        "Sri Lanka Electricity Act, No. 36 of 2024"
+      ]
+    },
+    {
+      "query": "What are requirements for rooftop solar inverters?",
+      "result_count": 5,
+      "keyword_match": true,
+      "organization_match": true,
+      "passed": true,
+      "retrieved_titles": [
+        "Analysis on Rooftop Solar Integration and Industry Growth in Sri Lanka",
+        "Guidelines on Rooftop Solar PV Installation for Solar Service Providers — Revision 1",
+        "Guidelines on Rooftop Solar PV Installation for Solar Service Providers — Revision 1",
+        "Guidelines on Rooftop Solar PV Installation for Solar Service Providers — Revision 1",
+        "Guidelines on Rooftop Solar PV Installation for Solar Service Providers — Revision 1"
+      ]
+    },
+    {
+      "query": "What guidance exists for rooftop solar with battery storage?",
+      "result_count": 5,
+      "keyword_match": true,
+      "organization_match": true,
+      "passed": true,
+      "retrieved_titles": [
+        "Guidelines on Interconnection and Operation of RTSPV and BESS for DLs and Prosumers",
+        "Guidelines on Interconnection and Operation of RTSPV and BESS for DLs and Prosumers",
+        "Analysis on Rooftop Solar Integration and Industry Growth in Sri Lanka",
+        "Analysis on Rooftop Solar Integration and Industry Growth in Sri Lanka",
+        "Analysis on Rooftop Solar Integration and Industry Growth in Sri Lanka"
+      ]
+    }
+  ]
+}
