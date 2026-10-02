@@ -3,7 +3,7 @@ import logging
 from collections.abc import Iterator
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -23,6 +23,7 @@ from app.security.prompt_guard import (
 from app.security.privacy import (
     redact_sensitive_data,
 )
+from app.security.rate_limit import limiter
 
 
 logger = logging.getLogger(__name__)
@@ -150,7 +151,9 @@ def _agentic_response(
 
 
 @router.post("/agentic/stream")
+@limiter.limit("20/minute")
 def stream_agentic_assistant(
+    request: Request,
     data: AssistantRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),

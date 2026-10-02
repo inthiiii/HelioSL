@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.agents.graph import build_agent_graph
@@ -20,6 +20,7 @@ from app.security.prompt_guard import (
 from app.security.privacy import (
     redact_sensitive_data,
 )
+from app.security.rate_limit import limiter
 
 
 router = APIRouter()
@@ -45,7 +46,9 @@ Keep answers concise and useful.
     "/agentic",
     response_model=AgenticResponse,
 )
+@limiter.limit("20/minute")
 def run_agentic_assistant(
+    request: Request,
     data: AssistantRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -145,7 +148,9 @@ def assistant_health(
     "/analyze",
     response_model=AssistantResponse,
 )
+@limiter.limit("20/minute")
 def analyze_message(
+    request: Request,
     data: AssistantRequest,
     current_user: User = Depends(
         get_current_user

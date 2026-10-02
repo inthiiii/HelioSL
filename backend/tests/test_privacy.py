@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from starlette.requests import Request
+
 from app.api.routes.assistant import (
     analyze_message,
     run_agentic_assistant,
@@ -19,6 +21,18 @@ TOKEN = (
     "eyJzdWIiOiIxIn0."
     "signature_123"
 )
+
+
+def _request(path: str) -> Request:
+    return Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": path,
+            "headers": [],
+            "client": ("127.0.0.1", 12345),
+        }
+    )
 
 
 def test_redact_sensitive_data_removes_email_and_jwt():
@@ -48,6 +62,7 @@ def test_analyze_endpoint_redacts_generated_output():
         return_value=client,
     ):
         response = analyze_message(
+            request=_request("/api/v1/assistant/analyze"),
             data=SimpleNamespace(
                 message="Explain solar energy."
             ),
@@ -78,6 +93,7 @@ def test_agentic_endpoint_redacts_final_answer():
         return_value=graph,
     ):
         response = run_agentic_assistant(
+            request=_request("/api/v1/assistant/agentic"),
             data=SimpleNamespace(
                 message="Explain solar energy."
             ),
