@@ -2,6 +2,10 @@ from sqlalchemy.orm import Session
 
 from app.agents.state import AgentState
 from app.rag.retriever import retrieve_chunks
+from app.security.source_guard import (
+    evaluate_source_trust,
+    sanitize_retrieved_content,
+)
 
 
 def run_knowledge_agent(
@@ -24,12 +28,33 @@ def run_knowledge_agent(
     context_parts: list[str] = []
     sources: list[dict] = []
     source_numbers: dict[int, int] = {}
+    rejected_count = 0
 
     for index, chunk in enumerate(
         chunks,
         start=1,
     ):
         document = chunk.document
+
+        trust = evaluate_source_trust(
+            document.organization
+        )
+
+        content_check = sanitize_retrieved_content(
+            chunk.content
+        )
+
+        if not trust["trusted"]:
+            rejected_count += 1
+            continue
+
+        if not content_check["safe"]:
+            rejected_count += 1
+            continue
+
+        safe_content = content_check[
+            "content"
+        ]
 
         source_number = source_numbers.get(
             document.id
@@ -69,13 +94,15 @@ Authority level: {document.authority_level}
 Document type: {document.document_type}
 
 Content:
-{chunk.content}
+{safe_content}
 """.strip()
         )
 
+    accepted_count = len(context_parts)
+
     result = {
         "query": query,
-        "result_count": len(chunks),
+        "result_count": accepted_count,
         "context": "\n\n".join(
             context_parts
         ),
@@ -85,10 +112,10 @@ Content:
         state.get("trace", [])
     )
 
-    if chunks:
+    if accepted_count:
         trace.append(
             f"Renewable Energy Knowledge Agent "
-            f"retrieved {len(chunks)} trusted "
+            f"retrieved {accepted_count} trusted "
             f"knowledge chunks."
         )
 
@@ -96,6 +123,13 @@ Content:
         trace.append(
             "Renewable Energy Knowledge Agent "
             "found no trusted supporting documents."
+        )
+
+    if rejected_count:
+        trace.append(
+            f"Knowledge source guard rejected "
+            f"{rejected_count} untrusted or unsafe "
+            f"knowledge chunks."
         )
 
     return {

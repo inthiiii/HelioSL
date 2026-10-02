@@ -4,6 +4,7 @@ import re
 SUSPICIOUS_PATTERNS = [
     r"ignore (all|any|the) previous instructions",
     r"ignore your previous instructions",
+    r"ignore (the )?(system|developer) instructions",
     r"forget your instructions",
     r"reveal (the )?system prompt",
     r"show (me )?your system prompt",
