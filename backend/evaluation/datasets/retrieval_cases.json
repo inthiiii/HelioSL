@@ -1,0 +1,30 @@
+[
+  {
+    "query": "What is Net Metering?",
+    "expected_keywords": [
+      "net metering"
+    ],
+    "expected_organizations": [
+      "Public Utilities Commission of Sri Lanka"
+    ]
+  },
+  {
+    "query": "What are requirements for rooftop solar inverters?",
+    "expected_keywords": [
+      "inverter"
+    ],
+    "expected_organizations": [
+      "Public Utilities Commission of Sri Lanka"
+    ]
+  },
+  {
+    "query": "What guidance exists for rooftop solar with battery storage?",
+    "expected_keywords": [
+      "BESS",
+      "battery"
+    ],
+    "expected_organizations": [
+      "Public Utilities Commission of Sri Lanka"
+    ]
+  }
+]

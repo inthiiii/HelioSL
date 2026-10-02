@@ -1,0 +1,43 @@
+[
+  {
+    "query": "Why is my electricity consumption increasing?",
+    "expected_intent": "energy_usage",
+    "expected_entities": {}
+  },
+  {
+    "query": "Why has my solar generation dropped?",
+    "expected_intent": "solar_performance",
+    "expected_entities": {}
+  },
+  {
+    "query": "Which solar scheme is suitable for me?",
+    "expected_intent": "solar_scheme",
+    "expected_entities": {}
+  },
+  {
+    "query": "I use 450 kWh every month in Colombo.",
+    "expected_intent": "energy_usage",
+    "expected_entities": {
+      "location": "Colombo",
+      "energy_kwh": 450.0
+    }
+  },
+  {
+    "query": "Should I install a 5 kW solar system in Kandy?",
+    "expected_intent": "solar_planning",
+    "expected_entities": {
+      "location": "Kandy",
+      "capacity_kw": 5.0
+    }
+  },
+  {
+    "query": "How much money can solar save me?",
+    "expected_intent": "financial",
+    "expected_entities": {}
+  },
+  {
+    "query": "Explain Net Accounting.",
+    "expected_intent": "solar_scheme",
+    "expected_entities": {}
+  }
+]
