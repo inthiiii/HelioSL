@@ -56,6 +56,9 @@ def classify_intent(
             "capacity",
             "kw",
             "solar system",
+            "solar suitability",
+            "suitability of solar",
+            "suitable for",
         ]
     ):
         return "solar_planning"

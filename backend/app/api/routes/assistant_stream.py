@@ -19,6 +19,9 @@ from app.schemas.assistant import (
 from app.services.audit_service import (
     create_audit_log,
 )
+from app.services.assistant_context_service import (
+    add_user_context,
+)
 from app.services.confidence_service import (
     determine_confidence,
 )
@@ -198,6 +201,15 @@ def stream_agentic_assistant(
 
             analysis = analyze_text(data.message)
 
+            entities = add_user_context(
+                analysis["entities"],
+                getattr(
+                    current_user,
+                    "district",
+                    None,
+                ),
+            )
+
             state: AgentState = {
                 "user_id": current_user.id,
                 "original_query": data.message,
@@ -205,7 +217,7 @@ def stream_agentic_assistant(
                     "normalized_query"
                 ],
                 "intent": analysis["intent"],
-                "entities": analysis["entities"],
+                "entities": entities,
                 "trace": [
                     "NLP normalized the query, classified "
                     "the intent and extracted entities."

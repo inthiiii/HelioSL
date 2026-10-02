@@ -37,6 +37,11 @@ def run_financial_agent(
         )
     )
 
+    if requested_capacity is None:
+        requested_capacity = energy.get(
+            "solar_capacity_kw"
+        )
+
     requested_energy = (
         entities.get(
             "energy_kwh"

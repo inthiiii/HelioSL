@@ -100,6 +100,73 @@ def test_missing_consumption_metrics_are_explained_clearly():
     assert "None" not in answer
 
 
+def test_energy_usage_answer_stays_focused_on_consumption():
+    result = safety_agent(
+        {
+            "intent": "energy_usage",
+            "selected_agents": ["energy"],
+            "energy_result": {
+                "average_consumption_kwh": 453.67,
+                "latest_consumption_kwh": 495.0,
+                "consumption_change_percent": 2.7,
+                "consumption_trend": "increasing",
+                "latest_generation_kwh": 475.0,
+                "generation_change_percent": -9.52,
+            },
+            "sources": [],
+            "draft_answer": (
+                "Solar generation caused consumption to rise."
+            ),
+            "trace": [],
+        }
+    )
+
+    answer = result["final_answer"]
+
+    assert "Latest consumption: 495 kWh" in answer
+    assert "increased by 2.7%" in answer
+    assert "Overall recorded trend: increasing" in answer
+    assert "solar generation" not in answer.lower()
+    assert "do not identify its cause" in answer
+
+
+def test_solar_answer_uses_weather_as_context_not_cause():
+    result = safety_agent(
+        {
+            "intent": "solar_performance",
+            "selected_agents": [
+                "energy",
+                "weather",
+                "knowledge",
+            ],
+            "energy_result": {
+                "latest_generation_kwh": 475.0,
+                "generation_change_percent": -9.52,
+            },
+            "weather_result": {
+                "available": True,
+                "location": "Colombo",
+                "cloud_cover_percent": 65,
+                "precipitation_mm": 0,
+            },
+            "sources": [{"title": "Trusted guidance"}],
+            "draft_answer": (
+                "Cloud cover caused the generation drop and the "
+                "agents conflict."
+            ),
+            "trace": [],
+        }
+    )
+
+    answer = result["final_answer"]
+
+    assert "a 9.52% decrease" in answer
+    assert "Current weather context for Colombo" in answer
+    assert "does not prove the cause" in answer
+    assert "caused the generation drop" not in answer
+    assert "agents conflict" not in answer
+
+
 def test_dangerous_electrical_instruction_is_replaced():
     result = safety_agent(
         {

@@ -28,9 +28,9 @@ def _format_measurement(
     return str(value)
 
 
-def _missing_energy_usage_answer(
+def _energy_usage_answer(
     energy_result: dict,
-) -> str | None:
+) -> str:
     latest = energy_result.get(
         "latest_consumption_kwh"
     )
@@ -40,28 +40,75 @@ def _missing_energy_usage_answer(
 
     if latest is None:
         return (
+            "### Energy trend\n"
             "No electricity-consumption records are currently "
-            "available, so HelioSL cannot confirm that usage is "
-            "increasing or determine why it may have changed. Add "
-            "at least two consumption records to compare usage over "
-            "time."
+            "available.\n\n"
+            "### What is needed\n"
+            "HelioSL cannot confirm that usage is increasing or "
+            "determine its cause. Add at least two monthly consumption "
+            "records before comparing usage over time."
         )
 
     if change is None:
         return (
-            "Your latest recorded electricity consumption is "
-            f"{_format_measurement(latest)} kWh, but there is no "
-            "usable preceding record for comparison. HelioSL "
-            "therefore cannot confirm that usage is increasing or "
-            "determine its cause yet."
+            "### Energy trend\n"
+            f"- Latest consumption: {_format_measurement(latest)} kWh\n"
+            "- Month-to-month change: unavailable\n\n"
+            "### Interpretation\n"
+            "There is no usable preceding record, so HelioSL cannot "
+            "confirm whether usage increased or determine why it may "
+            "have changed."
         )
 
-    return None
+    if change > 0:
+        change_text = (
+            f"increased by {_format_measurement(change)}%"
+        )
+    elif change < 0:
+        change_text = (
+            "decreased by "
+            f"{_format_measurement(abs(change))}%"
+        )
+    else:
+        change_text = "did not change"
+
+    trend = energy_result.get(
+        "consumption_trend",
+        "unavailable",
+    )
+    average = energy_result.get(
+        "average_consumption_kwh"
+    )
+
+    average_line = ""
+
+    if average is not None:
+        average_line = (
+            "- Recorded monthly average: "
+            f"{_format_measurement(average)} kWh\n"
+        )
+
+    return (
+        "### Energy trend\n"
+        f"- Latest consumption: {_format_measurement(latest)} kWh\n"
+        f"- Latest month-to-month change: {change_text}\n"
+        f"- Overall recorded trend: {str(trend).replace('_', ' ')}\n"
+        + average_line
+        + "\n### Interpretation\n"
+        "The records establish the direction of consumption, but they "
+        "do not identify its cause. Changes in occupancy, operating "
+        "hours, appliance use or billing-period length require separate "
+        "evidence.\n\n"
+        "### Next step\n"
+        "Compare the relevant months against household or business "
+        "activity and the original electricity bills."
+    )
 
 
 def _solar_performance_answer(
     energy_result: dict,
     trusted_sources_available: bool,
+    weather_result: dict,
 ) -> str:
     latest = energy_result.get(
         "latest_generation_kwh"
@@ -71,20 +118,60 @@ def _solar_performance_answer(
     )
 
     source_note = (
-        " Trusted supporting information is available, but recorded "
-        "generation measurements are still required to assess your "
-        "system's performance."
+        "Trusted reference material was retrieved for general context, "
+        "but it does not diagnose this installation."
         if trusted_sources_available
         else
-        " No trusted knowledge source is currently available to "
-        "verify a cause."
+        "No trusted knowledge source is currently available to verify "
+        "a cause."
     )
+
+    if weather_result.get("available"):
+        location = weather_result.get(
+            "location",
+            "the saved location",
+        )
+        cloud_cover = weather_result.get(
+            "cloud_cover_percent"
+        )
+        precipitation = weather_result.get(
+            "precipitation_mm"
+        )
+        conditions: list[str] = []
+
+        if cloud_cover is not None:
+            conditions.append(
+                f"{_format_measurement(cloud_cover)}% cloud cover"
+            )
+
+        if precipitation is not None:
+            conditions.append(
+                f"{_format_measurement(precipitation)} mm precipitation"
+            )
+
+        condition_text = (
+            ", ".join(conditions)
+            if conditions
+            else "environmental conditions"
+        )
+        weather_note = (
+            f"Current weather context for {location}: {condition_text}. "
+            "These conditions may influence solar output, but current "
+            "weather does not prove the cause of a historical change."
+        )
+    else:
+        weather_note = (
+            "Weather evidence was unavailable, so weather cannot be "
+            "assessed as a contributor."
+        )
 
     if latest is None:
         return (
-            "No solar-generation records are currently available, "
-            "so HelioSL cannot confirm that generation has dropped "
-            "or determine its cause."
+            "### Solar trend\n"
+            "No solar-generation records are currently available.\n\n"
+            "### Evidence limits\n"
+            "HelioSL cannot confirm that generation has dropped or determine "
+            "its cause. "
             + source_note
         )
 
@@ -92,10 +179,12 @@ def _solar_performance_answer(
 
     if change is None:
         return (
-            "Your latest recorded solar generation is "
-            f"{latest_text} kWh, but there is no usable preceding "
-            "record for comparison. HelioSL therefore cannot confirm "
-            "that generation has dropped or determine its cause."
+            "### Solar trend\n"
+            f"- Latest generation: {latest_text} kWh\n"
+            "- Month-to-month change: unavailable\n\n"
+            "### Evidence limits\n"
+            "There is no usable preceding record, so HelioSL cannot "
+            "confirm that generation has dropped or determine its cause. "
             + source_note
         )
 
@@ -117,12 +206,17 @@ def _solar_performance_answer(
         )
 
     return (
-        "Your latest recorded solar generation is "
-        f"{latest_text} kWh, with {trend_text}. This observed change "
-        "does not establish its cause."
-        + source_note
-        + " Have a qualified solar professional investigate any "
-        "persistent or unexpected reduction."
+        "### Solar trend\n"
+        f"- Latest generation: {latest_text} kWh\n"
+        f"- Latest month-to-month change: {trend_text}\n\n"
+        "### Evidence and interpretation\n"
+        "- The measured change does not establish its cause.\n"
+        f"- {weather_note}\n"
+        f"- {source_note}\n\n"
+        "### Recommended action\n"
+        "If the reduction persists, compare inverter monitoring and "
+        "maintenance records and ask a qualified solar professional "
+        "to inspect the system."
     )
 
 
@@ -131,6 +225,10 @@ def _preliminary_financial_answer(
 ) -> str:
     entities = state.get(
         "entities",
+        {},
+    )
+    financial = state.get(
+        "financial_result",
         {},
     )
     details: list[str] = []
@@ -144,24 +242,35 @@ def _preliminary_financial_answer(
 
     if energy_kwh is not None:
         details.append(
-            "monthly energy use of "
+            "- User-provided monthly energy use: "
             f"{_format_measurement(energy_kwh)} kWh"
         )
+    else:
+        profile_energy = financial.get(
+            "monthly_consumption_kwh"
+        )
+
+        if profile_energy is not None:
+            details.append(
+                "- Recorded monthly average consumption: "
+                f"{_format_measurement(profile_energy)} kWh"
+            )
 
     if capacity_kw is not None:
         details.append(
-            "a proposed capacity of "
+            "- Capacity stated in the question: "
             f"{_format_measurement(capacity_kw)} kW"
         )
-
-    identified = "HelioSL "
-
-    if details:
-        identified = (
-            "HelioSL identified "
-            + " and ".join(details)
-            + ", but "
+    else:
+        recorded_capacity = financial.get(
+            "requested_capacity_kw"
         )
+
+        if recorded_capacity is not None:
+            details.append(
+                "- Recorded solar-system capacity: "
+                f"{_format_measurement(recorded_capacity)} kW"
+            )
 
     suitability_text = (
         "cannot determine whether that capacity is suitable"
@@ -169,12 +278,23 @@ def _preliminary_financial_answer(
         else "cannot determine system suitability"
     )
 
+    context = (
+        "\n".join(details)
+        if details
+        else "- No usable consumption or capacity input was available."
+    )
+
     return (
-        identified
+        "### Available planning context\n"
+        + context
+        + "\n\n### Conclusion\nHelioSL "
         + suitability_text
-        + " or estimate savings or payback. Verified tariff, "
-        "installation-cost, site and "
-        "applicable solar-scheme information is still required."
+        + " or estimate savings or payback from the available evidence."
+        "\n\n### Required verified inputs\n"
+        "- Current import tariff and export compensation\n"
+        "- Installation cost\n"
+        "- Site-specific solar yield, roof and shading assessment\n"
+        "- Applicable solar-scheme terms"
     )
 
 
@@ -287,30 +407,20 @@ def safety_agent(
             {},
         )
 
-        final_answer = _missing_energy_usage_answer(
+        final_answer = _energy_usage_answer(
             energy_result
         )
-
-        if final_answer is None:
-            final_answer = draft
 
     elif intent == "solar_performance":
         energy_result = state.get(
             "energy_result",
             {},
         )
-        generation_metrics_missing = (
-            energy_result.get("latest_generation_kwh") is None
-            or energy_result.get("generation_change_percent") is None
+        final_answer = _solar_performance_answer(
+            energy_result,
+            bool(sources),
+            state.get("weather_result", {}),
         )
-
-        if generation_metrics_missing or not sources:
-            final_answer = _solar_performance_answer(
-                energy_result,
-                bool(sources),
-            )
-        else:
-            final_answer = draft
 
     elif knowledge_used and not sources and intent == "solar_scheme":
         final_answer = (

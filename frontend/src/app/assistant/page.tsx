@@ -9,6 +9,9 @@ import {
   AgentFlow,
 } from "@/components/assistant/agent-flow";
 import {
+  FormattedAssistantMessage,
+} from "@/components/assistant/formatted-assistant-message";
+import {
   TransparencyPanel,
 } from "@/components/assistant/transparency-panel";
 import type {
@@ -169,7 +172,15 @@ export default function AssistantPage() {
                         : "max-w-2xl rounded-2xl bg-neutral-800 p-4 text-neutral-100"
                     }
                   >
-                    <p>{message.content}</p>
+                    {message.role === "assistant" ? (
+                      <FormattedAssistantMessage
+                        content={message.content}
+                      />
+                    ) : (
+                      <p className="whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                    )}
 
                     {message.role === "assistant" &&
                       message.transparency && (

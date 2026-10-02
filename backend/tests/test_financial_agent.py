@@ -55,3 +55,22 @@ def test_financial_agent_identifies_missing_core_inputs():
         "monthly_consumption",
         "system_capacity_kw",
     ]
+
+
+def test_financial_agent_uses_recorded_system_capacity():
+    result = run_financial_agent(
+        {
+            "energy_result": {
+                "average_consumption_kwh": 2114.44,
+                "solar_capacity_kw": 20.0,
+            },
+            "entities": {},
+            "trace": [],
+        }
+    )
+
+    financial = result["financial_result"]
+
+    assert financial["monthly_consumption_kwh"] == 2114.44
+    assert financial["requested_capacity_kw"] == 20.0
+    assert financial["missing_inputs"] == []

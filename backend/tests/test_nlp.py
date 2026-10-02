@@ -30,3 +30,11 @@ def test_query_normalization():
         result["normalized_query"]
         == "my solar generation"
     )
+
+
+def test_solar_suitability_routes_to_planning():
+    result = analyze_text(
+        "Compare the suitability of solar for our business."
+    )
+
+    assert result["intent"] == "solar_planning"

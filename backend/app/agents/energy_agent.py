@@ -40,6 +40,12 @@ def run_energy_agent(
     )
 
     result = {
+        "solar_capacity_kw": (
+            float(solar_system.capacity_kw)
+            if solar_system
+            else None
+        ),
+
         "average_consumption_kwh":
             analysis.get("average_consumption_kwh"),
 
