@@ -21,24 +21,43 @@ import {
 } from "@/services/auth-service";
 
 import {
-  getEnergyProfile,
-} from "@/services/energy-service";
-
-import {
-  getSolarSystem,
-} from "@/services/solar-service";
+  getIntegratedSummary,
+} from "@/services/integration-service";
 
 import type {
   User,
 } from "@/types/user";
 
 import type {
-  EnergyProfile,
-} from "@/types/energy";
+  IntegratedSummary,
+} from "@/types/integration";
 
-import type {
-  SolarSystem,
-} from "@/types/solar";
+
+function formatNumber(
+  value: unknown,
+  unit: string,
+) {
+  if (typeof value !== "number") {
+    return "—";
+  }
+
+  return `${value.toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+  })} ${unit}`;
+}
+
+
+function formatLabel(value: unknown) {
+  if (typeof value !== "string" || !value) {
+    return "—";
+  }
+
+  return value
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) =>
+      letter.toUpperCase()
+    );
+}
 
 
 export default function DashboardPage() {
@@ -47,14 +66,14 @@ export default function DashboardPage() {
   const [user, setUser] =
     useState<User | null>(null);
 
-  const [energyProfile, setEnergyProfile] =
-    useState<EnergyProfile | null>(null);
-
-  const [solarSystem, setSolarSystem] =
-    useState<SolarSystem | null>(null);
+  const [summary, setSummary] =
+    useState<IntegratedSummary | null>(null);
 
   const [loading, setLoading] =
     useState(true);
+
+  const [error, setError] =
+    useState("");
 
 
   useEffect(() => {
@@ -65,45 +84,35 @@ export default function DashboardPage() {
       return;
     }
 
-    async function loadUser() {
+    async function loadDashboard() {
       try {
-        // Load current user
         const currentUser =
           await getCurrentUser();
 
         setUser(currentUser);
-
-
-        // Load energy profile
-        try {
-          const energy =
-            await getEnergyProfile();
-
-          setEnergyProfile(energy);
-        } catch {
-          setEnergyProfile(null);
-        }
-
-
-        // Load solar system
-        try {
-          const solar =
-            await getSolarSystem();
-
-          setSolarSystem(solar);
-        } catch {
-          setSolarSystem(null);
-        }
-
       } catch {
         removeToken();
         router.replace("/login");
+        return;
+      }
+
+      try {
+        const integratedSummary =
+          await getIntegratedSummary();
+
+        setSummary(integratedSummary);
+      } catch (loadError) {
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load the integrated summary."
+        );
       } finally {
         setLoading(false);
       }
     }
 
-    loadUser();
+    loadDashboard();
   }, [router]);
 
 
@@ -133,22 +142,48 @@ export default function DashboardPage() {
       </div>
 
 
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
+      {error ? (
+        <div
+          className="mt-8 rounded-2xl border border-red-900/70 bg-red-950/40 p-5 text-sm text-red-200"
+          role="alert"
+        >
+          {error}
+        </div>
+      ) : null}
 
-        {/* Monthly Consumption */}
+
+      <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+
+        {/* User Type */}
         <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
           <p className="text-sm text-neutral-400">
-            Monthly Consumption
+            User Type
           </p>
 
           <p className="mt-3 text-2xl font-semibold text-white">
-            {energyProfile?.average_monthly_consumption_kwh
-              ? `${energyProfile.average_monthly_consumption_kwh} kWh`
-              : "—"}
+            {formatLabel(summary?.user_type)}
           </p>
 
           <p className="mt-1 text-sm text-neutral-500">
-            {energyProfile
+            {summary?.district ?? "District not provided"}
+          </p>
+        </div>
+
+        {/* Average Consumption */}
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+          <p className="text-sm text-neutral-400">
+            Average Consumption
+          </p>
+
+          <p className="mt-3 text-2xl font-semibold text-white">
+            {formatNumber(
+              summary?.energy.average_consumption_kwh,
+              "kWh"
+            )}
+          </p>
+
+          <p className="mt-1 text-sm text-neutral-500">
+            {summary?.energy_profile_available
               ? "Average monthly electricity usage"
               : "Energy profile not loaded"}
           </p>
@@ -162,35 +197,86 @@ export default function DashboardPage() {
           </p>
 
           <p className="mt-3 text-2xl font-semibold text-white">
-            {solarSystem?.capacity_kw
-              ? `${solarSystem.capacity_kw} kW`
-              : "—"}
+            {formatNumber(
+              summary?.solar.capacity_kw,
+              "kW"
+            )}
           </p>
 
           <p className="mt-1 text-sm text-neutral-500">
-            {solarSystem
+            {summary?.solar_system_available
               ? "Installed solar system capacity"
               : "Solar system not loaded"}
           </p>
         </div>
 
 
-        {/* HelioSL AI */}
+        {/* Consumption Trend */}
         <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
           <p className="text-sm text-neutral-400">
-            HelioSL AI
+            Consumption Trend
           </p>
 
-          <p className="mt-3 text-2xl font-semibold text-emerald-400">
-            Ready
+          <p className="mt-3 text-2xl font-semibold text-white">
+            {formatLabel(
+              summary?.energy.consumption_trend
+            )}
           </p>
 
           <p className="mt-1 text-sm text-neutral-500">
-            Intelligence layer coming soon
+            Based on available consumption records
+          </p>
+        </div>
+
+
+        {/* Solar Generation Trend */}
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+          <p className="text-sm text-neutral-400">
+            Solar Generation Trend
+          </p>
+
+          <p className="mt-3 text-2xl font-semibold text-white">
+            {formatLabel(
+              summary?.energy.generation_trend
+            )}
+          </p>
+
+          <p className="mt-1 text-sm text-neutral-500">
+            Based on available generation records
           </p>
         </div>
 
       </div>
+
+
+      <section className="mt-8 rounded-2xl border border-amber-900/60 bg-amber-950/20 p-6">
+        <h2 className="text-lg font-semibold text-white">
+          HelioSL Insights
+        </h2>
+
+        <p className="mt-1 text-sm text-neutral-400">
+          Observations from your available energy and solar records.
+          These are indicators, not definitive fault diagnoses.
+        </p>
+
+        {summary?.alerts.length ? (
+          <ul className="mt-5 space-y-3">
+            {summary.alerts.map((alert) => (
+              <li
+                className="flex gap-3 text-sm text-amber-100"
+                key={alert}
+              >
+                <span aria-hidden="true">⚠</span>
+                <span>{alert}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-5 text-sm text-neutral-400">
+            No trend-based insights are currently available.
+          </p>
+        )}
+      </section>
     </DashboardShell>
   );
 }
