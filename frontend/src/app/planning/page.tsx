@@ -16,7 +16,16 @@ import type {
 } from "@/types/planning";
 
 
+type PlanningPreset =
+  | "household"
+  | "business"
+  | "custom";
+
+
 export default function PlanningPage() {
+  const [selectedPreset, setSelectedPreset] =
+    useState<PlanningPreset>("custom");
+
   const [monthlyConsumption, setMonthlyConsumption] =
     useState("");
 
@@ -46,6 +55,61 @@ export default function PlanningPage() {
 
   const [error, setError] =
     useState("");
+
+
+  function resetCalculation() {
+    setResult(null);
+    setError("");
+  }
+
+
+  function applyHouseholdPreset() {
+    setSelectedPreset("household");
+    setMonthlyConsumption("453.67");
+    setCapacity("5");
+    setCost("1250000");
+    setImportTariff("50");
+    setExportRate("27");
+    setSpecificYield("1400");
+    setSelfConsumption("40");
+    resetCalculation();
+  }
+
+
+  function applyBusinessPreset() {
+    setSelectedPreset("business");
+    setMonthlyConsumption("2114.44");
+    setCapacity("20");
+    setCost("4200000");
+    setImportTariff("55");
+    setExportRate("27");
+    setSpecificYield("1400");
+    setSelfConsumption("70");
+    resetCalculation();
+  }
+
+
+  function applyCustomPreset() {
+    setSelectedPreset("custom");
+    setMonthlyConsumption("");
+    setCapacity("");
+    setCost("");
+    setImportTariff("");
+    setExportRate("");
+    setSpecificYield("");
+    setSelfConsumption("40");
+    resetCalculation();
+  }
+
+
+  function updateCustomValue(
+    setter: (value: string) => void,
+    value: string,
+  ) {
+    setSelectedPreset("custom");
+    setter(value);
+    resetCalculation();
+  }
 
 
   async function handleSubmit(
@@ -129,47 +193,115 @@ export default function PlanningPage() {
           onSubmit={handleSubmit}
           className="space-y-5 rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
         >
+          <fieldset>
+            <legend className="text-sm font-medium text-neutral-200">
+              Planning preset
+            </legend>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <PresetButton
+                active={selectedPreset === "household"}
+                label="Household Demo"
+                onClick={applyHouseholdPreset}
+              />
+
+              <PresetButton
+                active={selectedPreset === "business"}
+                label="Business Demo"
+                onClick={applyBusinessPreset}
+              />
+
+              <PresetButton
+                active={selectedPreset === "custom"}
+                label="Custom"
+                onClick={applyCustomPreset}
+              />
+            </div>
+
+            <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs leading-5 text-amber-200">
+              Synthetic demonstration assumptions only — verify current
+              tariffs, installation costs and site yield before real-world
+              use. Preset consumption values mirror the synthetic demo
+              profiles and are not customer records.
+            </p>
+          </fieldset>
+
           <Input
             label="Average monthly consumption (kWh)"
             value={monthlyConsumption}
-            setValue={setMonthlyConsumption}
+            setValue={(value) =>
+              updateCustomValue(
+                setMonthlyConsumption,
+                value,
+              )
+            }
             help="Optional when your energy profile already contains this value."
           />
 
           <Input
             label="Solar capacity (kW)"
             value={capacity}
-            setValue={setCapacity}
+            setValue={(value) =>
+              updateCustomValue(
+                setCapacity,
+                value,
+              )
+            }
           />
 
           <Input
             label="Installation cost (LKR)"
             value={cost}
-            setValue={setCost}
+            setValue={(value) =>
+              updateCustomValue(
+                setCost,
+                value,
+              )
+            }
           />
 
           <Input
             label="Import tariff (LKR/kWh)"
             value={importTariff}
-            setValue={setImportTariff}
+            setValue={(value) =>
+              updateCustomValue(
+                setImportTariff,
+                value,
+              )
+            }
           />
 
           <Input
             label="Export rate (LKR/kWh)"
             value={exportRate}
-            setValue={setExportRate}
+            setValue={(value) =>
+              updateCustomValue(
+                setExportRate,
+                value,
+              )
+            }
           />
 
           <Input
             label="Specific solar yield (kWh/kW/year)"
             value={specificYield}
-            setValue={setSpecificYield}
+            setValue={(value) =>
+              updateCustomValue(
+                setSpecificYield,
+                value,
+              )
+            }
           />
 
           <Input
             label="Estimated self-consumption (%)"
             value={selfConsumption}
-            setValue={setSelfConsumption}
+            setValue={(value) =>
+              updateCustomValue(
+                setSelfConsumption,
+                value,
+              )
+            }
           />
 
           {error && (
@@ -331,6 +463,32 @@ export default function PlanningPage() {
         </div>
       </div>
     </DashboardShell>
+  );
+}
+
+
+function PresetButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
+        active
+          ? "border-emerald-400 bg-emerald-400/15 text-emerald-300"
+          : "border-neutral-700 bg-neutral-950 text-neutral-300 hover:border-neutral-500"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
