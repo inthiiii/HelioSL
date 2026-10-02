@@ -14,6 +14,9 @@ from app.schemas.assistant import (
     AssistantResponse,
 )
 from app.security.dependencies import get_current_user
+from app.security.prompt_guard import (
+    detect_prompt_injection,
+)
 
 
 router = APIRouter()
@@ -44,6 +47,20 @@ def run_agentic_assistant(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> AgenticResponse:
+    prompt_check = detect_prompt_injection(
+        data.message
+    )
+
+    if prompt_check["is_suspicious"]:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "The request contains instructions "
+                "that attempt to override HelioSL's "
+                "security or system behaviour."
+            ),
+        )
+
     analysis = analyze_text(data.message)
 
     initial_state: AgentState = {
@@ -124,6 +141,20 @@ def analyze_message(
         get_current_user
     ),
 ):
+    prompt_check = detect_prompt_injection(
+        data.message
+    )
+
+    if prompt_check["is_suspicious"]:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "The request contains instructions "
+                "that attempt to override HelioSL's "
+                "security or system behaviour."
+            ),
+        )
+
     analysis = analyze_text(
         data.message
     )

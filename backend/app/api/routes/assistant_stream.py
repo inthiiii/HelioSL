@@ -3,7 +3,7 @@ import logging
 from collections.abc import Iterator
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -17,6 +17,9 @@ from app.schemas.assistant import (
     AssistantRequest,
 )
 from app.security.dependencies import get_current_user
+from app.security.prompt_guard import (
+    detect_prompt_injection,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -142,6 +145,20 @@ def stream_agentic_assistant(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> StreamingResponse:
+    prompt_check = detect_prompt_injection(
+        data.message
+    )
+
+    if prompt_check["is_suspicious"]:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "The request contains instructions "
+                "that attempt to override HelioSL's "
+                "security or system behaviour."
+            ),
+        )
+
     def generate_events() -> Iterator[str]:
         active_agent = "nlp"
 
