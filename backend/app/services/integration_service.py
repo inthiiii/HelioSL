@@ -12,6 +12,50 @@ from app.services.solar_service import (
     get_generation_records,
     get_solar_system,
 )
+from app.services.weather_service import (
+    get_weather_context,
+)
+
+
+def build_dashboard_tips(
+    analytics: dict,
+    weather: dict,
+) -> list[str]:
+    tips: list[str] = []
+
+    if analytics.get("consumption_trend") == "increasing":
+        tips.append(
+            "Compare recent occupancy, operating hours and appliance "
+            "use with earlier months to investigate rising consumption."
+        )
+
+    if analytics.get("generation_trend") == "decreasing":
+        tips.append(
+            "Review inverter monitoring and maintenance records if the "
+            "generation decline continues."
+        )
+
+    cloud_cover = weather.get(
+        "cloud_cover_percent"
+    )
+
+    if (
+        weather.get("available")
+        and isinstance(cloud_cover, (int, float))
+        and cloud_cover >= 70
+    ):
+        tips.append(
+            "Current cloud cover may reduce short-term solar output, "
+            "but it does not prove the cause of a historical trend."
+        )
+
+    if not tips:
+        tips.append(
+            "Keep monthly consumption and generation records updated "
+            "to improve future trend analysis."
+        )
+
+    return tips
 
 
 def build_integrated_summary(
@@ -44,6 +88,15 @@ def build_integrated_summary(
     analytics = analyze_energy_data(
         consumption,
         generation,
+    )
+
+    weather = (
+        get_weather_context(user.district)
+        if user.district
+        else {
+            "available": False,
+            "reason": "No district available",
+        }
     )
 
     alerts: list[str] = []
@@ -134,5 +187,10 @@ def build_integrated_summary(
         ),
         "energy": energy_data,
         "solar": solar_data,
+        "weather": weather,
         "alerts": alerts,
+        "tips": build_dashboard_tips(
+            analytics,
+            weather,
+        ),
     }

@@ -7,6 +7,8 @@ export interface IntegratedSummary {
 
   energy: Record<string, unknown>;
   solar: Record<string, unknown>;
+  weather: Record<string, unknown>;
 
   alerts: string[];
+  tips: string[];
 }

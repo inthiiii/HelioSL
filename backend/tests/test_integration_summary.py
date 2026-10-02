@@ -90,6 +90,18 @@ def test_integrated_summary_returns_household_demo_state(
         "get_generation_records",
         lambda db, solar_system_id: generation,
     )
+    monkeypatch.setattr(
+        integration_service,
+        "get_weather_context",
+        lambda location: {
+            "available": True,
+            "location": location,
+            "temperature_c": 29.5,
+            "humidity_percent": 78,
+            "cloud_cover_percent": 80,
+            "precipitation_mm": 0.2,
+        },
+    )
 
     app.dependency_overrides[get_db] = lambda: Mock()
     app.dependency_overrides[get_current_user] = lambda: user
@@ -118,10 +130,13 @@ def test_integrated_summary_returns_household_demo_state(
     assert data["energy"]["generation_trend"] == "decreasing"
     assert data["solar"]["capacity_kw"] == 5
     assert data["solar"]["record_count"] == 9
+    assert data["weather"]["available"] is True
+    assert data["weather"]["location"] == "Colombo"
     assert data["alerts"] == [
         "Electricity consumption is increasing.",
         "Solar generation is decreasing.",
     ]
+    assert len(data["tips"]) == 3
 
 
 def test_integrated_summary_requires_authentication():

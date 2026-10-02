@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -75,6 +76,41 @@ export default function DashboardPage() {
   const [error, setError] =
     useState("");
 
+  const [refreshing, setRefreshing] =
+    useState(false);
+
+  const [lastUpdated, setLastUpdated] =
+    useState<Date | null>(null);
+
+
+  const refreshSummary = useCallback(
+    async (showProgress = true) => {
+      if (showProgress) {
+        setRefreshing(true);
+      }
+
+      try {
+        const integratedSummary =
+          await getIntegratedSummary();
+
+        setSummary(integratedSummary);
+        setLastUpdated(new Date());
+        setError("");
+      } catch (loadError) {
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load the integrated summary."
+        );
+      } finally {
+        if (showProgress) {
+          setRefreshing(false);
+        }
+      }
+    },
+    [],
+  );
+
 
   useEffect(() => {
     const token = getToken();
@@ -96,24 +132,21 @@ export default function DashboardPage() {
         return;
       }
 
-      try {
-        const integratedSummary =
-          await getIntegratedSummary();
-
-        setSummary(integratedSummary);
-      } catch (loadError) {
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Unable to load the integrated summary."
-        );
-      } finally {
-        setLoading(false);
-      }
+      await refreshSummary(false);
+      setLoading(false);
     }
 
     loadDashboard();
-  }, [router]);
+
+    const refreshInterval = window.setInterval(
+      () => refreshSummary(false),
+      5 * 60 * 1000,
+    );
+
+    return () => {
+      window.clearInterval(refreshInterval);
+    };
+  }, [refreshSummary, router]);
 
 
   if (loading) {
@@ -127,18 +160,37 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell>
-      <div>
-        <p className="text-sm text-neutral-400">
-          Overview
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-5">
+        <div>
+          <p className="text-sm text-neutral-400">
+            Overview
+          </p>
 
-        <h1 className="mt-2 text-3xl font-semibold text-white">
-          Welcome, {user?.full_name}
-        </h1>
+          <h1 className="mt-2 text-3xl font-semibold text-white">
+            Welcome, {user?.full_name}
+          </h1>
 
-        <p className="mt-2 text-neutral-400">
-          Your renewable energy intelligence dashboard.
-        </p>
+          <p className="mt-2 text-neutral-400">
+            Your renewable energy intelligence dashboard.
+          </p>
+        </div>
+
+        <div className="text-right">
+          <button
+            type="button"
+            disabled={refreshing}
+            onClick={() => refreshSummary()}
+            className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/20 disabled:opacity-50"
+          >
+            {refreshing ? "Refreshing..." : "Refresh live data"}
+          </button>
+
+          <p className="mt-2 text-xs text-neutral-500">
+            {lastUpdated
+              ? `Updated ${lastUpdated.toLocaleTimeString()}`
+              : "Waiting for live data"}
+          </p>
+        </div>
       </div>
 
 
@@ -249,34 +301,148 @@ export default function DashboardPage() {
       </div>
 
 
-      <section className="mt-8 rounded-2xl border border-amber-900/60 bg-amber-950/20 p-6">
-        <h2 className="text-lg font-semibold text-white">
-          HelioSL Insights
-        </h2>
+      <section className="mt-8 overflow-hidden rounded-2xl border border-sky-500/20 bg-gradient-to-br from-sky-950/60 via-neutral-900 to-emerald-950/40 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-sky-300">
+              Live environmental context
+            </p>
 
-        <p className="mt-1 text-sm text-neutral-400">
-          Observations from your available energy and solar records.
-          These are indicators, not definitive fault diagnoses.
+            <h2 className="mt-2 text-xl font-semibold text-white">
+              Weather in {summary?.district ?? "your district"}
+            </h2>
+          </div>
+
+          <span className="rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-xs text-sky-200">
+            {summary?.weather.available ? "Live" : "Unavailable"}
+          </span>
+        </div>
+
+        {summary?.weather.available ? (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <WeatherMetric
+              label="Temperature"
+              value={formatNumber(
+                summary.weather.temperature_c,
+                "°C"
+              )}
+            />
+            <WeatherMetric
+              label="Humidity"
+              value={formatNumber(
+                summary.weather.humidity_percent,
+                "%"
+              )}
+            />
+            <WeatherMetric
+              label="Cloud cover"
+              value={formatNumber(
+                summary.weather.cloud_cover_percent,
+                "%"
+              )}
+            />
+            <WeatherMetric
+              label="Precipitation"
+              value={formatNumber(
+                summary.weather.precipitation_mm,
+                "mm"
+              )}
+            />
+            <WeatherMetric
+              label="Solar radiation"
+              value={formatNumber(
+                summary.weather.shortwave_radiation_sum,
+                "MJ/m²"
+              )}
+            />
+          </div>
+        ) : (
+          <p className="mt-5 text-sm text-neutral-400">
+            {typeof summary?.weather.reason === "string"
+              ? summary.weather.reason
+              : "Live weather is temporarily unavailable."}
+          </p>
+        )}
+
+        <p className="mt-5 text-xs leading-5 text-neutral-500">
+          Live conditions can provide context for short-term output,
+          but they do not prove the cause of historical performance changes.
         </p>
+      </section>
 
-        {summary?.alerts.length ? (
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl border border-amber-900/60 bg-amber-950/20 p-6">
+          <h2 className="text-lg font-semibold text-white">
+            HelioSL Insights
+          </h2>
+
+          <p className="mt-1 text-sm text-neutral-400">
+            Data observations—not definitive fault diagnoses.
+          </p>
+
+          {summary?.alerts.length ? (
+            <ul className="mt-5 space-y-3">
+              {summary.alerts.map((alert) => (
+                <li
+                  className="flex gap-3 text-sm text-amber-100"
+                  key={alert}
+                >
+                  <span aria-hidden="true">⚠</span>
+                  <span>{alert}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-5 text-sm text-neutral-400">
+              No trend-based insights are currently available.
+            </p>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-emerald-900/60 bg-emerald-950/20 p-6">
+          <h2 className="text-lg font-semibold text-white">
+            Practical tips
+          </h2>
+
+          <p className="mt-1 text-sm text-neutral-400">
+            Suggestions adapt to your latest records and conditions.
+          </p>
+
           <ul className="mt-5 space-y-3">
-            {summary.alerts.map((alert) => (
+            {summary?.tips.map((tip) => (
               <li
-                className="flex gap-3 text-sm text-amber-100"
-                key={alert}
+                className="flex gap-3 text-sm leading-6 text-emerald-100"
+                key={tip}
               >
-                <span aria-hidden="true">⚠</span>
-                <span>{alert}</span>
+                <span aria-hidden="true">→</span>
+                <span>{tip}</span>
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="mt-5 text-sm text-neutral-400">
-            No trend-based insights are currently available.
-          </p>
-        )}
-      </section>
+        </section>
+      </div>
     </DashboardShell>
+  );
+}
+
+
+function WeatherMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+      <p className="text-xs text-neutral-400">
+        {label}
+      </p>
+
+      <p className="mt-2 text-lg font-semibold text-white">
+        {value}
+      </p>
+    </div>
   );
 }

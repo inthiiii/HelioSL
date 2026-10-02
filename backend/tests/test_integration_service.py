@@ -65,6 +65,15 @@ def test_build_integrated_summary_with_complete_data():
             "analyze_energy_data",
             return_value=analytics,
         ),
+        patch(
+            "app.services.integration_service."
+            "get_weather_context",
+            return_value={
+                "available": True,
+                "location": "Colombo",
+                "cloud_cover_percent": 82,
+            },
+        ),
     ):
         result = build_integrated_summary(
             db,
@@ -81,6 +90,7 @@ def test_build_integrated_summary_with_complete_data():
     )
     assert result["solar"]["capacity_kw"] == 5.0
     assert result["solar"]["record_count"] == 3
+    assert result["weather"]["location"] == "Colombo"
     assert result["alerts"] == [
         "Electricity consumption is increasing.",
         "Solar generation is decreasing.",
@@ -89,6 +99,8 @@ def test_build_integrated_summary_with_complete_data():
             "the historical baseline."
         ),
     ]
+    assert len(result["tips"]) == 3
+    assert "cloud cover" in result["tips"][2].lower()
 
 
 def test_build_integrated_summary_without_optional_data():
@@ -141,7 +153,17 @@ def test_build_integrated_summary_without_optional_data():
     assert result["energy"]["provider"] is None
     assert result["solar"]["capacity_kw"] is None
     assert result["solar"]["record_count"] == 0
+    assert result["weather"] == {
+        "available": False,
+        "reason": "No district available",
+    }
     assert result["alerts"] == []
+    assert result["tips"] == [
+        (
+            "Keep monthly consumption and generation records "
+            "updated to improve future trend analysis."
+        )
+    ]
 
 
 def test_gradual_changes_are_detected_as_overall_trends():

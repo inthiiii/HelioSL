@@ -2,6 +2,8 @@
 
 import {
   FormEvent,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -62,6 +64,25 @@ export default function AssistantPage() {
 
   const [stages, setStages] =
     useState<AgentStage[]>([]);
+
+  const flowRef =
+    useRef<HTMLDivElement | null>(null);
+
+
+  useEffect(() => {
+    if (!loading || stages.length === 0) {
+      return;
+    }
+
+    flowRef.current?.focus({
+      preventScroll: true,
+    });
+
+    flowRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [loading, stages]);
 
 
   async function handleSubmit(
@@ -193,7 +214,25 @@ export default function AssistantPage() {
               )}
 
               {stages.length > 0 && (
-                <AgentFlow stages={stages} />
+                <div
+                  ref={flowRef}
+                  tabIndex={-1}
+                  aria-live="polite"
+                  className={`max-w-2xl rounded-2xl outline-none transition-all ${
+                    loading
+                      ? "ring-2 ring-emerald-400/70 ring-offset-4 ring-offset-neutral-900"
+                      : ""
+                  }`}
+                >
+                  {loading ? (
+                    <div className="mb-3 flex items-center gap-2 text-sm font-medium text-emerald-300">
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                      HelioSL agents are working on your question
+                    </div>
+                  ) : null}
+
+                  <AgentFlow stages={stages} />
+                </div>
               )}
             </div>
           )}

@@ -12,5 +12,7 @@ class IntegratedSummary(BaseModel):
 
     energy: dict[str, Any]
     solar: dict[str, Any]
+    weather: dict[str, Any]
 
     alerts: list[str]
+    tips: list[str]
