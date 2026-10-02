@@ -164,6 +164,7 @@ export default function HomePage() {
                   src="https://www.solanra.com/example/gallery/18-pelawatta-5kw-project.jpg"
                   alt="Rooftop solar installation on a Sri Lankan home"
                   fill
+                  unoptimized
                   priority
                   sizes="(max-width: 1024px) 90vw, 42vw"
                   className="object-cover"
@@ -450,6 +451,7 @@ function PhotoCard({
         src={src}
         alt={alt}
         fill
+        unoptimized
         sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 28vw"
         className="object-cover transition duration-700 group-hover:scale-105"
       />
