@@ -76,6 +76,7 @@ def test_analyze_endpoint_redacts_generated_output():
 
 def test_agentic_endpoint_redacts_final_answer():
     graph = Mock()
+    response_db = Mock()
     graph.invoke.return_value = {
         "final_answer": f"Email {EMAIL}; token {TOKEN}",
         "intent": "general",
@@ -91,18 +92,27 @@ def test_agentic_endpoint_redacts_final_answer():
     with patch(
         "app.api.routes.assistant.build_agent_graph",
         return_value=graph,
-    ):
+    ), patch(
+        "app.api.routes.assistant.create_audit_log"
+    ) as audit_log:
         response = run_agentic_assistant(
             request=_request("/api/v1/assistant/agentic"),
             data=SimpleNamespace(
                 message="Explain solar energy."
             ),
-            db=SimpleNamespace(),
+            db=response_db,
             current_user=SimpleNamespace(id=1),
         )
 
     assert response.message == (
         "Email [REDACTED_EMAIL]; token [REDACTED_TOKEN]"
+    )
+    audit_log.assert_called_once_with(
+        db=response_db,
+        user_id=1,
+        action="agentic_assistant_request",
+        status="success",
+        resource="assistant",
     )
 
 

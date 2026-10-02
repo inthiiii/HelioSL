@@ -16,6 +16,9 @@ from app.schemas.assistant import (
     AgenticResponse,
     AssistantRequest,
 )
+from app.services.audit_service import (
+    create_audit_log,
+)
 from app.security.dependencies import get_current_user
 from app.security.prompt_guard import (
     detect_prompt_injection,
@@ -280,6 +283,14 @@ def stream_agentic_assistant(
             response = _agentic_response(
                 state,
                 data.message,
+            )
+
+            create_audit_log(
+                db=db,
+                user_id=current_user.id,
+                action="agentic_assistant_request",
+                status="success",
+                resource="assistant",
             )
 
             yield sse_event(

@@ -10,6 +10,8 @@ from app.models.solar import (
 
 from app.models.user import User
 
+from app.models.audit import AuditLog
+
 from app.models.knowledge import (
     KnowledgeChunk,
     KnowledgeDocument,
@@ -23,4 +25,5 @@ __all__ = [
     "SolarGenerationRecord",
     "KnowledgeChunk",
     "KnowledgeDocument",
+    "AuditLog",
 ]

@@ -237,6 +237,11 @@ def test_agentic_api_preserves_schema_for_missing_solar_metrics(
             "entities": {},
         },
     )
+    monkeypatch.setattr(
+        assistant,
+        "create_audit_log",
+        lambda **kwargs: None,
+    )
 
     app.dependency_overrides[get_db] = lambda: None
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(

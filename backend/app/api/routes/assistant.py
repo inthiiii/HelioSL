@@ -13,6 +13,9 @@ from app.schemas.assistant import (
     AssistantRequest,
     AssistantResponse,
 )
+from app.services.audit_service import (
+    create_audit_log,
+)
 from app.security.dependencies import get_current_user
 from app.security.prompt_guard import (
     detect_prompt_injection,
@@ -92,6 +95,14 @@ def run_agentic_assistant(
             "final_answer",
             "",
         )
+    )
+
+    create_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action="agentic_assistant_request",
+        status="success",
+        resource="assistant",
     )
 
     return AgenticResponse(
