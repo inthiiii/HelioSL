@@ -20,6 +20,9 @@ from app.security.dependencies import get_current_user
 from app.security.prompt_guard import (
     detect_prompt_injection,
 )
+from app.security.privacy import (
+    redact_sensitive_data,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -106,8 +109,15 @@ def _agentic_response(
     state: AgentState,
     fallback_query: str,
 ) -> AgenticResponse:
+    final_answer = redact_sensitive_data(
+        state.get(
+            "final_answer",
+            "",
+        )
+    )
+
     return AgenticResponse(
-        message=state.get("final_answer", ""),
+        message=final_answer,
         intent=state.get("intent", "general"),
         entities=state.get("entities", {}),
         normalized_query=state.get(

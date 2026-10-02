@@ -17,6 +17,9 @@ from app.security.dependencies import get_current_user
 from app.security.prompt_guard import (
     detect_prompt_injection,
 )
+from app.security.privacy import (
+    redact_sensitive_data,
+)
 
 
 router = APIRouter()
@@ -81,8 +84,15 @@ def run_agentic_assistant(
         initial_state
     )
 
+    final_answer = redact_sensitive_data(
+        result.get(
+            "final_answer",
+            "",
+        )
+    )
+
     return AgenticResponse(
-        message=result.get("final_answer", ""),
+        message=final_answer,
         intent=result.get("intent", "general"),
         entities=result.get("entities", {}),
         normalized_query=result.get(
@@ -185,8 +195,12 @@ Respond helpfully to the user.
         system_prompt=SYSTEM_PROMPT,
     )
 
+    safe_content = redact_sensitive_data(
+        content
+    )
+
     return AssistantResponse(
-        message=content,
+        message=safe_content,
         intent=analysis["intent"],
         entities=analysis["entities"],
         normalized_query=analysis[
