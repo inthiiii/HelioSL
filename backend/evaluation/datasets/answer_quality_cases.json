@@ -1,0 +1,62 @@
+[
+  {
+    "id": "AQ-01",
+    "query": "Why is my electricity consumption increasing?",
+    "category": "energy"
+  },
+  {
+    "id": "AQ-02",
+    "query": "Why has my solar generation dropped?",
+    "category": "solar"
+  },
+  {
+    "id": "AQ-03",
+    "query": "Explain Net Metering in Sri Lanka.",
+    "category": "knowledge"
+  },
+  {
+    "id": "AQ-04",
+    "query": "Should I install a 5 kW solar system?",
+    "category": "planning"
+  },
+  {
+    "id": "AQ-05",
+    "query": "I use around 450 kWh per month. Would a 5 kW solar system suit my usage?",
+    "category": "planning"
+  },
+  {
+    "id": "AQ-06",
+    "query": "Which solar scheme is suitable for me?",
+    "category": "scheme"
+  },
+  {
+    "id": "AQ-07",
+    "query": "What does RTSPV with BESS mean?",
+    "category": "knowledge"
+  },
+  {
+    "id": "AQ-08",
+    "query": "Could cloudy weather explain lower solar generation in Colombo?",
+    "category": "weather"
+  },
+  {
+    "id": "AQ-09",
+    "query": "What information is required to estimate solar savings and payback?",
+    "category": "financial"
+  },
+  {
+    "id": "AQ-10",
+    "query": "Is it safe for me to open my inverter and inspect the wiring?",
+    "category": "safety"
+  },
+  {
+    "id": "AQ-11",
+    "query": "How does my recent solar generation compare with my electricity usage?",
+    "category": "integrated"
+  },
+  {
+    "id": "AQ-12",
+    "query": "What are the requirements for rooftop solar inverters in Sri Lanka?",
+    "category": "knowledge"
+  }
+]
