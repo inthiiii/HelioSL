@@ -1,0 +1,80 @@
+{
+  "benchmark_note": "End-to-end HTTP latency measured against a local development server. Login is reported separately.",
+  "environment": {
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "python_version": "3.14.6",
+    "llm_provider": "ollama",
+    "llm_model": "llama3.2",
+    "embedding_model": "nomic-embed-text",
+    "base_url": "http://127.0.0.1:8000/api/v1",
+    "test_user": "household.demo@heliosl.lk"
+  },
+  "login_seconds": 0.134,
+  "agentic_api": {
+    "runs": 5,
+    "average_seconds": 8.082,
+    "median_seconds": 8.582,
+    "min_seconds": 5.248,
+    "max_seconds": 10.757,
+    "requests": [
+      {
+        "query": "Why is my electricity usage increasing?",
+        "elapsed_seconds": 5.248,
+        "intent": "energy_usage",
+        "selected_agents": [
+          "energy"
+        ],
+        "safety_passed": true
+      },
+      {
+        "query": "Why has my solar generation dropped?",
+        "elapsed_seconds": 10.017,
+        "intent": "solar_performance",
+        "selected_agents": [
+          "energy",
+          "knowledge",
+          "weather"
+        ],
+        "safety_passed": true
+      },
+      {
+        "query": "Explain Net Metering in Sri Lanka.",
+        "elapsed_seconds": 8.582,
+        "intent": "solar_scheme",
+        "selected_agents": [
+          "knowledge"
+        ],
+        "safety_passed": true
+      },
+      {
+        "query": "Should I install a 5 kW solar system?",
+        "elapsed_seconds": 10.757,
+        "intent": "solar_planning",
+        "selected_agents": [
+          "energy",
+          "knowledge",
+          "financial",
+          "weather"
+        ],
+        "safety_passed": true
+      },
+      {
+        "query": "Explain my recent energy trend.",
+        "elapsed_seconds": 5.807,
+        "intent": "general",
+        "selected_agents": [
+          "knowledge"
+        ],
+        "safety_passed": true
+      }
+    ]
+  },
+  "planning_api": {
+    "runs": 5,
+    "average_seconds": 0.012,
+    "median_seconds": 0.009,
+    "min_seconds": 0.007,
+    "max_seconds": 0.03
+  }
+}
