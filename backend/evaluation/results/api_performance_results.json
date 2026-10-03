@@ -10,17 +10,17 @@
     "base_url": "http://127.0.0.1:8000/api/v1",
     "test_user": "household.demo@heliosl.lk"
   },
-  "login_seconds": 0.134,
+  "login_seconds": 0.05,
   "agentic_api": {
     "runs": 5,
-    "average_seconds": 8.082,
-    "median_seconds": 8.582,
-    "min_seconds": 5.248,
-    "max_seconds": 10.757,
+    "average_seconds": 9.981,
+    "median_seconds": 9.374,
+    "min_seconds": 6.091,
+    "max_seconds": 18.614,
     "requests": [
       {
         "query": "Why is my electricity usage increasing?",
-        "elapsed_seconds": 5.248,
+        "elapsed_seconds": 6.266,
         "intent": "energy_usage",
         "selected_agents": [
           "energy"
@@ -29,7 +29,7 @@
       },
       {
         "query": "Why has my solar generation dropped?",
-        "elapsed_seconds": 10.017,
+        "elapsed_seconds": 18.614,
         "intent": "solar_performance",
         "selected_agents": [
           "energy",
@@ -40,7 +40,7 @@
       },
       {
         "query": "Explain Net Metering in Sri Lanka.",
-        "elapsed_seconds": 8.582,
+        "elapsed_seconds": 9.56,
         "intent": "solar_scheme",
         "selected_agents": [
           "knowledge"
@@ -49,7 +49,7 @@
       },
       {
         "query": "Should I install a 5 kW solar system?",
-        "elapsed_seconds": 10.757,
+        "elapsed_seconds": 9.374,
         "intent": "solar_planning",
         "selected_agents": [
           "energy",
@@ -61,7 +61,7 @@
       },
       {
         "query": "Explain my recent energy trend.",
-        "elapsed_seconds": 5.807,
+        "elapsed_seconds": 6.091,
         "intent": "general",
         "selected_agents": [
           "knowledge"
@@ -72,9 +72,9 @@
   },
   "planning_api": {
     "runs": 5,
-    "average_seconds": 0.012,
-    "median_seconds": 0.009,
-    "min_seconds": 0.007,
-    "max_seconds": 0.03
+    "average_seconds": 0.008,
+    "median_seconds": 0.006,
+    "min_seconds": 0.005,
+    "max_seconds": 0.015
   }
 }

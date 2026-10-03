@@ -67,13 +67,13 @@ This report consolidates the automated and human-scored evaluation artifacts pro
 - Test platform: macOS-27.0-arm64-arm-64bit-Mach-O
 - RAM: 18.0 GB
 - LLM: ollama / llama3.2
-- NLP average: 0.003 ms
-- RAG retrieval average: 28.678 ms
+- NLP average: 0.006 ms
+- RAG retrieval average: 25.997 ms
 
 ### API latency
 
-- Agentic assistant average: 8.082 seconds across 5 runs
-- Planning API average: 0.012 seconds across 5 runs
+- Agentic assistant average: 9.981 seconds across 5 runs
+- Planning API average: 0.008 seconds across 5 runs
 
 ## Household, Business and Security Evaluation
 
