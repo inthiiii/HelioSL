@@ -16,6 +16,10 @@ const navigation = [
     href: "/energy",
   },
   {
+    name: "Import Bill",
+    href: "/energy/bills",
+  },
+  {
     name: "Solar",
     href: "/solar",
   },

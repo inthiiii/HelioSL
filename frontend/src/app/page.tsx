@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { SolarPathFinder } from "@/components/landing/solar-path-finder";
+
 
 const features = [
   {
@@ -80,6 +82,9 @@ export default function HomePage() {
           <div className="hidden items-center gap-8 text-sm text-white/65 md:flex">
             <Link className="transition hover:text-white" href="#why">
               Why HelioSL
+            </Link>
+            <Link className="transition hover:text-white" href="#solar-path">
+              Find my path
             </Link>
             <Link className="transition hover:text-white" href="#platform">
               Platform
@@ -203,6 +208,9 @@ export default function HomePage() {
           Source: PUCSL, Analysis on Rooftop Solar Integration & Industry Growth, 2026.
         </p>
       </section>
+
+
+      <SolarPathFinder />
 
 
       <section id="why" className="mx-auto max-w-7xl px-6 py-28 lg:px-8">
@@ -401,7 +409,6 @@ export default function HomePage() {
             >
               SLSEA solar information
             </a>
-            <span>Images: Solanra, Macksons Solar, DIMO</span>
           </div>
         </div>
       </footer>

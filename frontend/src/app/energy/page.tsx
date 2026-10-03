@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -66,18 +67,27 @@ export default function EnergyPage() {
 
   return (
     <DashboardShell>
-      <div>
-        <p className="text-sm text-neutral-400">
-          Energy
-        </p>
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm text-neutral-400">
+            Energy
+          </p>
 
-        <h1 className="mt-2 text-3xl font-semibold text-white">
-          Energy Overview
-        </h1>
+          <h1 className="mt-2 text-3xl font-semibold text-white">
+            Energy Overview
+          </h1>
 
-        <p className="mt-2 text-neutral-400">
-          Understand your electricity consumption and costs.
-        </p>
+          <p className="mt-2 text-neutral-400">
+            Understand your electricity consumption and costs.
+          </p>
+        </div>
+
+        <Link
+          href="/energy/bills"
+          className="inline-flex w-fit items-center justify-center rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-emerald-300"
+        >
+          Import electricity bill
+        </Link>
       </div>
 
       <div className="mt-8 grid gap-5 md:grid-cols-3">

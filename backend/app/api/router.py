@@ -5,6 +5,7 @@ from app.api.routes import (
     assistant,
     assistant_stream,
     auth,
+    bills,
     energy,
     health,
     integration,
@@ -40,6 +41,12 @@ api_router.include_router(
     energy.router,
     prefix="/energy",
     tags=["Energy"],
+)
+
+api_router.include_router(
+    bills.router,
+    prefix="/energy",
+    tags=["Electricity Bill Import"],
 )
 
 api_router.include_router(
