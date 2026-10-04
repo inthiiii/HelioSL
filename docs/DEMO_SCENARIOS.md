@@ -13,6 +13,7 @@ cd backend
 source .venv/bin/activate
 alembic upgrade head
 python -m scripts.seed_demo_data
+python -m scripts.seed_space_industries
 python -m uvicorn app.main:app --reload
 ```
 
@@ -87,6 +88,31 @@ Recommended questions:
 - How does our solar generation compare with usage?
 - Compare the suitability of solar for our business.
 - What information is required to estimate financial payback?
+
+## Space Industries Demo
+
+| Field | Synthetic value |
+| --- | --- |
+| Name | Space Industries |
+| Email | `spaceindustries@gmail.com` |
+| Password | `SpaceIndustries123` |
+| Location | Gampaha |
+| User type | Business |
+| Connection | Industrial |
+| Solar capacity | 75 kW |
+
+This account contains 18 months of synthetic electricity consumption,
+bill, solar generation, grid-import and solar-export records from April
+2025 through September 2026. Running `python -m
+scripts.seed_space_industries` replaces only this synthetic account and
+does not modify the household or other business demos.
+
+Recommended questions:
+
+- How has our electricity consumption changed over the last year?
+- How does our recent solar generation compare with our usage?
+- Has our grid dependence increased?
+- What verified inputs are required for a commercial solar expansion?
 
 ## Planning presets
 

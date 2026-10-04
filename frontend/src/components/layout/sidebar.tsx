@@ -14,7 +14,7 @@ const navigation = [
   { name: "Import Bill", shortName: "Bills", href: "/energy/bills", icon: "▤" },
   { name: "Solar", shortName: "Solar", href: "/solar", icon: "☀" },
   { name: "Solar Planner", shortName: "Planner", href: "/planning", icon: "◇" },
-  { name: "AI Assistant", shortName: "Assistant", href: "/assistant", icon: "✦" },
+  { name: "HelioSL AI", shortName: "HelioSL AI", href: "/assistant", icon: "✦" },
 ];
 
 

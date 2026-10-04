@@ -11,9 +11,12 @@ import { streamAssistantMessage } from "@/services/assistant-service";
 import type { AgenticAssistantResponse } from "@/types/assistant";
 
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
+interface ChatTurn {
+  id: number;
+  question: string;
+  answer: string | null;
+  failed?: boolean;
+  transparency?: AgenticAssistantResponse;
 }
 
 
@@ -76,17 +79,17 @@ function followUpQuestions(response: AgenticAssistantResponse | null): string[] 
 
 export default function AssistantPage() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [stages, setStages] = useState<AgentStage[]>(initialAgentStages());
   const [activeResponse, setActiveResponse] = useState<AgenticAssistantResponse | null>(null);
   const flowRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const turnCounterRef = useRef(0);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, loading]);
+  }, [turns, loading]);
 
   useEffect(() => {
     if (!loading) return;
@@ -98,9 +101,18 @@ export default function AssistantPage() {
     const cleanMessage = message.trim();
     if (!cleanMessage || loading) return;
 
-    setMessages((current) => [...current, { role: "user", content: cleanMessage }]);
+    turnCounterRef.current += 1;
+    const turnId = turnCounterRef.current;
+
+    setTurns((current) => [
+      ...current,
+      {
+        id: turnId,
+        question: cleanMessage,
+        answer: null,
+      },
+    ]);
     setInput("");
-    setError("");
     setActiveResponse(null);
     setStages(initialAgentStages());
     setLoading(true);
@@ -114,10 +126,41 @@ export default function AssistantPage() {
         ));
       });
 
-      setMessages((current) => [...current, { role: "assistant", content: response.message }]);
+      setTurns((current) => current.map((turn) =>
+        turn.id === turnId
+          ? {
+              ...turn,
+              answer: response.message,
+              transparency: response,
+            }
+          : turn
+      ));
       setActiveResponse(response);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "HelioSL AI request failed");
+      const message = requestError instanceof Error
+        ? requestError.message
+        : "HelioSL AI could not complete this request.";
+
+      setTurns((current) => current.map((turn) =>
+        turn.id === turnId
+          ? {
+              ...turn,
+              answer: message,
+              failed: true,
+            }
+          : turn
+      ));
+      setStages((current) => current.map((stage, index) =>
+        index === 0
+          ? {
+              ...stage,
+              label: "Request safely stopped",
+              status: "error",
+            }
+          : stage.status === "waiting"
+            ? { ...stage, status: "skipped" }
+            : stage
+      ));
     } finally {
       setLoading(false);
     }
@@ -140,9 +183,9 @@ export default function AssistantPage() {
         </div>
 
         <div className="mt-7 grid min-h-0 flex-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="flex min-h-[650px] min-w-0 flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900">
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-              {messages.length === 0 ? (
+          <section className="flex h-[calc(100vh-11rem)] min-h-[620px] max-h-[900px] min-w-0 flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6">
+              {turns.length === 0 ? (
                 <div className="flex min-h-full items-center justify-center py-12">
                   <div className="max-w-xl text-center">
                     <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-2xl text-emerald-300">✦</span>
@@ -166,18 +209,26 @@ export default function AssistantPage() {
                 </div>
               ) : (
                 <div className="mx-auto max-w-3xl space-y-5">
-                  {messages.map((message, index) => (
-                    <div
-                      key={`${message.role}-${index}`}
-                      className={message.role === "user"
-                        ? "ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-emerald-400 p-4 text-[#06110d]"
-                        : "mr-auto max-w-[92%] rounded-2xl rounded-bl-md border border-neutral-700/70 bg-neutral-800 p-5 text-neutral-100"
-                      }
-                    >
-                      {message.role === "assistant"
-                        ? <FormattedAssistantMessage content={message.content} />
-                        : <p className="whitespace-pre-wrap">{message.content}</p>
-                      }
+                  {turns.map((turn) => (
+                    <div key={turn.id} className="space-y-3 border-b border-neutral-800/70 pb-5 last:border-0">
+                      <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-emerald-400 p-4 text-[#06110d]">
+                        <p className="whitespace-pre-wrap">{turn.question}</p>
+                      </div>
+
+                      {turn.answer && (
+                        <div className={`mr-auto max-w-[92%] rounded-2xl rounded-bl-md border p-5 text-neutral-100 ${
+                          turn.failed
+                            ? "border-amber-500/25 bg-amber-500/[0.07]"
+                            : "border-neutral-700/70 bg-neutral-800"
+                        }`}>
+                          {turn.failed && (
+                            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-amber-300">
+                              Request not processed
+                            </p>
+                          )}
+                          <FormattedAssistantMessage content={turn.answer} />
+                        </div>
+                      )}
                     </div>
                   ))}
 
@@ -214,8 +265,6 @@ export default function AssistantPage() {
               )}
             </div>
 
-            {error && <p role="alert" className="mx-4 mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300 sm:mx-6">{error}</p>}
-
             <form onSubmit={handleSubmit} className="border-t border-neutral-800 bg-neutral-950/45 p-3 sm:p-4">
               <div className="mx-auto flex max-w-3xl gap-3">
                 <input
@@ -236,7 +285,7 @@ export default function AssistantPage() {
             ref={flowRef}
             tabIndex={-1}
             aria-live="polite"
-            className={`min-w-0 rounded-2xl border bg-neutral-900 p-4 outline-none transition-all sm:p-5 xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto ${
+            className={`h-[calc(100vh-11rem)] min-h-[620px] max-h-[900px] min-w-0 overflow-y-auto overscroll-contain rounded-2xl border bg-neutral-900 p-4 outline-none transition-all sm:p-5 ${
               loading
                 ? "border-emerald-400/45 shadow-[0_0_45px_rgba(52,211,153,0.10)] ring-2 ring-emerald-400/15"
                 : "border-neutral-800"

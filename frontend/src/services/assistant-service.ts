@@ -44,9 +44,21 @@ export async function streamAssistantMessage(
   );
 
   if (!response.ok) {
-    throw new Error(
-      `Agentic request failed (${response.status})`
-    );
+    let message = `HelioSL AI request failed (${response.status})`;
+
+    try {
+      const data = await response.json() as {
+        detail?: string;
+      };
+
+      if (data.detail) {
+        message = data.detail;
+      }
+    } catch {
+      // Keep the status-based fallback when no JSON body is available.
+    }
+
+    throw new Error(message);
   }
 
   if (!response.body) {

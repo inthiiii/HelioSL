@@ -8,6 +8,10 @@ from app.services.analytics_service import (
 from app.services.planning_service import (
     calculate_solar_scenario,
 )
+from scripts.seed_space_industries import (
+    SPACE_INDUSTRIES_CONSUMPTION,
+    SPACE_INDUSTRIES_GENERATION,
+)
 
 
 def test_household_demo_planning():
@@ -99,3 +103,18 @@ def test_business_demo_trends_match_seeded_records():
     assert trend_from_change(
         generation_change
     ) == "decreasing"
+
+
+def test_space_industries_has_more_than_one_year_of_data():
+    assert len(SPACE_INDUSTRIES_CONSUMPTION) == 18
+    assert len(SPACE_INDUSTRIES_GENERATION) == 18
+
+    first_consumption_month = (
+        SPACE_INDUSTRIES_CONSUMPTION[0][0]
+    )
+    last_consumption_month = (
+        SPACE_INDUSTRIES_CONSUMPTION[-1][0]
+    )
+
+    assert first_consumption_month == "2025-04-01"
+    assert last_consumption_month == "2026-09-01"
