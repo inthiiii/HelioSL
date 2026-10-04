@@ -13,7 +13,10 @@ from app.schemas.auth import (
     RegisterRequest,
     TokenResponse,
 )
-from app.schemas.user import UserResponse
+from app.schemas.user import (
+    UserResponse,
+    UserUpdate,
+)
 from app.security.dependencies import get_current_user
 from app.security.jwt import create_access_token
 from app.services.auth_service import (
@@ -90,4 +93,29 @@ def read_current_user(
         get_current_user
     ),
 ):
+    return current_user
+
+
+@router.patch(
+    "/me",
+    response_model=UserResponse,
+)
+def update_current_user(
+    data: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        get_current_user
+    ),
+):
+    updates = data.model_dump(
+        exclude_unset=True,
+    )
+
+    for field, value in updates.items():
+        setattr(current_user, field, value)
+
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+
     return current_user

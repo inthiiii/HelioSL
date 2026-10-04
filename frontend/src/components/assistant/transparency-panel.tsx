@@ -35,7 +35,7 @@ export function TransparencyPanel({
   );
 
   return (
-    <section className="mt-4 border-t border-neutral-700 pt-4">
+    <section className="mt-5 border-t border-neutral-700 pt-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">
           Responsible AI transparency

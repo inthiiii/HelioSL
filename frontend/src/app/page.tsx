@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { HelioLogo } from "@/components/brand/helio-logo";
 import { SolarPathFinder } from "@/components/landing/solar-path-finder";
 
 
@@ -61,25 +62,9 @@ export default function HomePage() {
     <main className="overflow-hidden bg-[#06110d] text-white">
       <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#06110d]/85 backdrop-blur-xl">
         <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
-          <Link
-            href="#home"
-            className="flex items-center gap-3"
-            aria-label="HelioSL home"
-          >
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-400 text-lg font-black text-[#06110d]">
-              H
-            </span>
-            <span>
-              <span className="block text-lg font-semibold tracking-tight">
-                HelioSL
-              </span>
-              <span className="block text-[10px] uppercase tracking-[0.24em] text-emerald-300/80">
-                Energy intelligence
-              </span>
-            </span>
-          </Link>
+          <HelioLogo href="#home" />
 
-          <div className="hidden items-center gap-8 text-sm text-white/65 md:flex">
+          <div className="hidden items-center gap-8 text-sm text-white/65 lg:flex">
             <Link className="transition hover:text-white" href="#why">
               Why HelioSL
             </Link>
@@ -102,7 +87,7 @@ export default function HomePage() {
               Log in
             </Link>
             <Link
-              href="/register"
+              href="/get-started"
               className="rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-[#06110d] transition hover:bg-emerald-300"
             >
               Get started
@@ -141,7 +126,7 @@ export default function HomePage() {
 
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
-                href="/register"
+                href="/get-started"
                 className="rounded-2xl bg-emerald-400 px-6 py-3.5 font-semibold text-[#06110d] shadow-[0_18px_60px_rgba(52,211,153,0.22)] transition hover:-translate-y-0.5 hover:bg-emerald-300"
               >
                 Start with HelioSL
@@ -374,7 +359,7 @@ export default function HomePage() {
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link
-            href="/register"
+            href="/get-started"
             className="rounded-2xl bg-emerald-400 px-7 py-4 font-semibold text-[#06110d] transition hover:bg-emerald-300"
           >
             Get started

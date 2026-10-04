@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 
 import {
   getConsumptionRecords,
@@ -55,13 +56,7 @@ export default function EnergyPage() {
 
 
   if (loading) {
-    return (
-      <DashboardShell>
-        <p className="text-white">
-          Loading energy data...
-        </p>
-      </DashboardShell>
-    );
+    return <LoadingScreen label="Loading your energy records" />;
   }
 
 

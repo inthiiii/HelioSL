@@ -5,6 +5,7 @@ from pydantic import (
     ConfigDict,
     EmailStr,
     Field,
+    field_validator,
 )
 
 
@@ -28,3 +29,50 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
     )
+
+
+class UserUpdate(BaseModel):
+    full_name: str | None = Field(
+        default=None,
+        min_length=2,
+        max_length=120,
+    )
+    district: str | None = Field(
+        default=None,
+        max_length=100,
+    )
+    user_type: str | None = None
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(
+        cls,
+        value: str | None,
+    ) -> str:
+        if value is None:
+            raise ValueError(
+                "Full name cannot be null"
+            )
+
+        return value
+
+    @field_validator("user_type")
+    @classmethod
+    def validate_user_type(
+        cls,
+        value: str | None,
+    ) -> str:
+        if value is None:
+            raise ValueError(
+                "User type cannot be null"
+            )
+
+        if value not in {
+            "household",
+            "business",
+        }:
+            raise ValueError(
+                "User type must be household or business"
+            )
+
+        return value

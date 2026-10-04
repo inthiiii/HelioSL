@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 
 import {
   getSolarGeneration,
@@ -52,13 +53,7 @@ export default function SolarPage() {
 
 
   if (loading) {
-    return (
-      <DashboardShell>
-        <p className="text-white">
-          Loading solar data...
-        </p>
-      </DashboardShell>
-    );
+    return <LoadingScreen label="Loading your solar intelligence" />;
   }
 
 

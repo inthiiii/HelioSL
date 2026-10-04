@@ -35,15 +35,13 @@ const statusSymbol: Record<AgentStageStatus, string> = {
 
 export function AgentFlow({ stages }: AgentFlowProps) {
   return (
-    <section className="max-w-2xl rounded-2xl border border-neutral-800 bg-neutral-950/70 p-5">
+    <section className="rounded-xl border border-neutral-800 bg-neutral-950/70 p-4">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-medium text-white">
           Live agent flow
         </h2>
 
-        <span className="text-xs text-neutral-500">
-          HelioSL orchestration
-        </span>
+        <span className="text-[10px] uppercase tracking-wider text-neutral-600">Live</span>
       </div>
 
       <div className="space-y-2">

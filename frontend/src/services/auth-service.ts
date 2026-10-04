@@ -6,7 +6,10 @@ import type {
   TokenResponse,
 } from "@/types/auth";
 
-import type { User } from "@/types/user";
+import type {
+  User,
+  UserUpdate,
+} from "@/types/user";
 
 
 export function registerUser(
@@ -38,5 +41,18 @@ export function loginUser(
 export function getCurrentUser() {
   return apiRequest<User>(
     "/auth/me"
+  );
+}
+
+
+export function updateCurrentUser(
+  data: UserUpdate
+) {
+  return apiRequest<User>(
+    "/auth/me",
+    {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "next/navigation";
 
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 
 import {
   getToken,
@@ -150,11 +151,7 @@ export default function DashboardPage() {
 
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-neutral-950 p-10 text-white">
-        Loading HelioSL...
-      </main>
-    );
+    return <LoadingScreen />;
   }
 
 
