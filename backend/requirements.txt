@@ -69,7 +69,7 @@ typing_extensions==4.16.0
 urllib3==2.8.0
 uuid_utils==0.17.1
 uvicorn==0.53.0
-uvloop==0.22.1
+uvloop==0.22.1; sys_platform != "win32"
 watchfiles==1.2.0
 websockets==16.1.1
 wrapt==2.5.0
