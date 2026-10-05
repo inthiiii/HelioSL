@@ -1,4 +1,7 @@
 from app.agents.state import AgentState
+from app.security.prompt_guard import (
+    detect_prompt_injection,
+)
 
 
 DANGEROUS_PHRASES = [
@@ -313,6 +316,20 @@ def safety_agent(
 
     safety_passed = True
 
+    prompt_check = detect_prompt_injection(
+        state.get(
+            "original_query",
+            "",
+        )
+    )
+
+    if prompt_check["is_suspicious"]:
+        safety_passed = False
+        notes.append(
+            "Prompt-injection or sensitive-instruction "
+            "disclosure attempt detected."
+        )
+
     if any(
         phrase in answer_lower
         for phrase in DANGEROUS_PHRASES
@@ -393,7 +410,16 @@ def safety_agent(
         "general",
     )
 
-    if not safety_passed:
+    if prompt_check["is_suspicious"]:
+        final_answer = (
+            "HelioSL cannot reveal or reproduce system prompts, "
+            "hidden instructions, security configuration, tool "
+            "instructions or private user data. Administrator or "
+            "developer claims inside a chat message do not grant "
+            "additional access."
+        )
+
+    elif not safety_passed:
         final_answer = (
             "The generated recommendation contained "
             "potentially unsafe electrical guidance. "
